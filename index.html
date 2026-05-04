@@ -115,6 +115,16 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .tip-card{background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:12px;padding:12px 14px;margin-bottom:10px}
 .tip-cat{font-size:10px;color:var(--accent2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px}
 .tip-body{font-size:13px;color:var(--text2);line-height:1.6}
+#api-modal{position:fixed;inset:0;background:rgba(10,10,15,0.95);z-index:200;display:none;flex-direction:column;align-items:center;justify-content:center;padding:32px}
+#api-modal.open{display:flex}
+.api-box{background:#1a1a25;border:1px solid rgba(108,99,255,0.3);border-radius:20px;padding:28px 24px;width:100%;max-width:360px}
+.api-box h2{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:#f0f0ff;margin-bottom:8px}
+.api-box p{font-size:13px;color:#9090b0;line-height:1.6;margin-bottom:20px}
+.api-input{width:100%;background:#111118;border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 16px;font-size:14px;color:#f0f0ff;font-family:'DM Sans',sans-serif;outline:none;margin-bottom:12px}
+.api-input:focus{border-color:#6c63ff}
+.api-save-btn{width:100%;padding:13px;background:#6c63ff;border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif}
+.api-save-btn:active{opacity:0.85}
+.api-link{display:block;text-align:center;margin-top:14px;font-size:12px;color:#6c63ff;text-decoration:none}
 #toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:10px 18px;font-size:13px;color:var(--text);opacity:0;transition:all .3s;z-index:999;white-space:nowrap;pointer-events:none}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
@@ -172,6 +182,16 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
       <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Tiến độ
     </button>
   </nav>
+</div>
+
+<div id="api-modal">
+  <div class="api-box">
+    <h2>🔑 Nhập API Key</h2>
+    <p>Anh cần API key của Anthropic để dùng AI chat. Key được lưu trên máy anh, không gửi đi đâu khác.</p>
+    <input class="api-input" id="api-key-input" type="password" placeholder="sk-ant-api03-..." />
+    <button class="api-save-btn" onclick="saveApiKey()">Lưu và bắt đầu</button>
+    <a class="api-link" href="https://console.anthropic.com/settings/keys" target="_blank">Lấy API key tại console.anthropic.com →</a>
+  </div>
 </div>
 
 <div id="shadow-player">
@@ -357,13 +377,20 @@ async function sendMessage() {
   showTyping();
   stats.messages++; saveStats();
   try {
+    var apiKey = localStorage.getItem('fluentApiKey') || '';
+    if (!apiKey) { removeTyping(); showApiKeyScreen(); return; }
     var res = await fetch('https://api.anthropic.com/v1/messages', {
       method:'POST',
-      headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true'},
+      headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true','x-api-key':apiKey,'anthropic-version':'2023-06-01'},
       body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:600,system:MODES[currentMode].system,messages:chatHistory})
     });
     var data = await res.json();
     removeTyping();
+    if (res.status === 401 || (data.error && data.error.type === 'authentication_error')) {
+      localStorage.removeItem('fluentApiKey');
+      addMsg('ai', '🔑 API key không hợp lệ. Vui lòng nhập lại.', null);
+      showApiKeyScreen(); return;
+    }
     var reply = (data.content && data.content[0] && data.content[0].text) ? data.content[0].text : 'Sorry, something went wrong.';
     chatHistory.push({role:'assistant', content:reply});
     var plain = reply.replace(/\*\*(.+?)\*\*/g,'$1').replace(/\n/g,' ').substring(0,300);
@@ -527,6 +554,21 @@ document.addEventListener('DOMContentLoaded', function() {
   inp.addEventListener('keydown', function(e){ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();} });
 });
 
+function showApiKeyScreen() {
+  document.getElementById('api-modal').classList.add('open');
+  setTimeout(function(){ document.getElementById('api-key-input').focus(); }, 300);
+}
+
+function saveApiKey() {
+  var key = document.getElementById('api-key-input').value.trim();
+  if (!key || !key.startsWith('sk-')) { showToast('Key không hợp lệ, phải bắt đầu bằng sk-'); return; }
+  localStorage.setItem('fluentApiKey', key);
+  document.getElementById('api-modal').classList.remove('open');
+  showToast('✅ Đã lưu API key!');
+  var wb = document.getElementById('welcome-box');
+  if (!wb) addMsg('ai', '✅ API key đã lưu! Hãy chọn chế độ và bắt đầu luyện tiếng Anh nhé anh!', null);
+}
+
 speechSynthesis.onvoiceschanged = function(){ speechSynthesis.getVoices(); };
 updateStreak();
 renderShadowList();
@@ -535,6 +577,9 @@ setTimeout(function(){
   var wb=document.getElementById('welcome-box');
   if(wb && document.getElementById('chat-messages').children.length===0){
     addMsg('ai',"👋 Hi! I'm your English AI Coach.<br><br>Choose a mode above and let's start practicing! Tap the mic 🎙️ to speak instead of typing.<br><br><em style='color:var(--text3);font-size:13px'>Chọn chế độ ở trên để bắt đầu luyện nhé anh!</em>","Hi! I'm your English AI Coach. Choose a mode and let's start!");
+  }
+  if (!localStorage.getItem('fluentApiKey')) {
+    setTimeout(showApiKeyScreen, 800);
   }
 },400);
 </script>
