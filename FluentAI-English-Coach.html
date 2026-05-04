@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0a0f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>FluentAI — English Coach</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a0f;--bg2:#111118;--bg3:#1a1a25;--bg4:#22222f;
+  --accent:#6c63ff;--accent2:#a78bfa;
+  --green:#34d399;--orange:#fb923c;--red:#f87171;
+  --text:#f0f0ff;--text2:#9090b0;--text3:#5a5a78;
+  --border:rgba(255,255,255,0.07);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif}
+#app{height:100dvh;display:flex;flex-direction:column;max-width:480px;margin:0 auto}
+#nav{display:flex;background:var(--bg2);border-top:1px solid var(--border);padding:8px 0 max(8px,env(safe-area-inset-bottom));flex-shrink:0}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px;border:none;background:none;color:var(--text3);font-family:'DM Sans',sans-serif;font-size:10px;cursor:pointer;transition:color .2s}
+.nav-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.nav-btn.active{color:var(--accent2)}
+.screen{display:none;flex:1;flex-direction:column;overflow:hidden}
+.screen.active{display:flex}
+.top-bar{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;flex-shrink:0}
+.top-bar h1{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;background:linear-gradient(135deg,#a78bfa,#6c63ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.badge{font-size:11px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:4px 10px;color:var(--text2)}
+#chat-messages{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth}
+.msg{max-width:85%;animation:fadeUp .25s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.msg.user{align-self:flex-end}
+.msg.ai{align-self:flex-start}
+.bubble{padding:10px 14px;border-radius:18px;font-size:15px;line-height:1.55}
+.msg.user .bubble{background:var(--accent);color:#fff;border-bottom-right-radius:4px}
+.msg.ai .bubble{background:var(--bg3);color:var(--text);border-bottom-left-radius:4px;border:1px solid var(--border)}
+.speak-again{background:none;border:1px solid var(--border);border-radius:10px;padding:4px 10px;font-size:11px;color:var(--text2);cursor:pointer;margin-top:6px;display:flex;align-items:center;gap:5px;transition:all .2s}
+.speak-again:hover{border-color:var(--accent2);color:var(--accent2)}
+.speak-again svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+.typing-dots{display:flex;align-items:center;gap:5px;padding:10px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:18px;border-bottom-left-radius:4px;width:fit-content}
+.dot{width:7px;height:7px;background:var(--text3);border-radius:50%;animation:bounce 1.2s infinite}
+.dot:nth-child(2){animation-delay:.2s}
+.dot:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
+#chat-input-area{padding:10px 16px;padding-bottom:max(12px,env(safe-area-inset-bottom));background:var(--bg);border-top:1px solid var(--border);flex-shrink:0}
+.input-row{display:flex;gap:8px;align-items:flex-end}
+#msg-input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:10px 16px;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--text);resize:none;max-height:100px;outline:none;line-height:1.4;transition:border-color .2s}
+#msg-input:focus{border-color:var(--accent)}
+#msg-input::placeholder{color:var(--text3)}
+.icon-btn{width:42px;height:42px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
+.icon-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#send-btn{background:var(--accent);color:#fff}
+#send-btn:active{transform:scale(.92)}
+#mic-btn{background:var(--bg3);border:1px solid var(--border);color:var(--text2)}
+#mic-btn.recording{background:var(--red);border-color:var(--red);color:#fff;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(248,113,113,.4)}50%{box-shadow:0 0 0 8px rgba(248,113,113,0)}}
+.mode-chips{display:flex;gap:6px;margin-bottom:8px;overflow-x:auto;padding-bottom:2px}
+.mode-chips::-webkit-scrollbar{display:none}
+.chip{flex-shrink:0;font-size:12px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif}
+.chip.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.welcome-box{margin:12px 16px;background:linear-gradient(135deg,rgba(108,99,255,.15),rgba(167,139,250,.08));border:1px solid rgba(108,99,255,.2);border-radius:16px;padding:16px}
+.welcome-box h2{font-family:'Syne',sans-serif;font-size:16px;font-weight:600;margin-bottom:6px}
+.welcome-box p{font-size:13px;color:var(--text2);line-height:1.6}
+.shadow-list{flex:1;overflow-y:auto;padding:0 16px 16px}
+.shadow-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:18px;margin-bottom:14px;cursor:pointer;transition:all .25s;position:relative;overflow:hidden}
+.shadow-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.shadow-card:active{transform:scale(.98)}
+.s-cat{font-size:11px;color:var(--accent2);font-weight:500;text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px}
+.s-title{font-family:'Syne',sans-serif;font-size:17px;font-weight:600;margin-bottom:6px}
+.s-preview{font-size:13px;color:var(--text2);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.s-meta{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.meta-pill{font-size:11px;padding:3px 10px;background:var(--bg4);border-radius:20px;color:var(--text3)}
+#shadow-player{position:fixed;inset:0;background:var(--bg);z-index:100;display:none;flex-direction:column}
+#shadow-player.open{display:flex}
+.player-header{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--border);flex-shrink:0}
+.back-btn{width:36px;height:36px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2)}
+.back-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.player-title-text{font-family:'Syne',sans-serif;font-size:15px;font-weight:600;flex:1}
+.player-body{flex:1;overflow-y:auto;padding:20px}
+.script-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;line-height:1.5}
+.sent-block{margin-bottom:14px}
+.sent-text{font-size:17px;line-height:1.7;color:var(--text);background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:14px 16px;transition:all .3s}
+.sent-text.active{border-color:var(--accent);background:rgba(108,99,255,.08)}
+.phonetic{font-size:12px;color:var(--accent2);margin-top:5px;padding:0 4px;font-style:italic}
+.player-controls{padding:16px 20px;padding-bottom:max(16px,env(safe-area-inset-bottom));border-top:1px solid var(--border);flex-shrink:0}
+.speed-row{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.speed-label{font-size:12px;color:var(--text3);min-width:44px}
+.speed-btns{display:flex;gap:6px}
+.speed-btn{font-size:12px;padding:5px 11px;border-radius:20px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif}
+.speed-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.ctrl-row{display:flex;gap:12px;align-items:center;justify-content:center}
+.ctrl-btn{width:50px;height:50px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);transition:all .2s}
+.ctrl-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+.ctrl-play{width:62px;height:62px;background:var(--accent);border-color:var(--accent);color:#fff}
+.ctrl-play svg{width:22px;height:22px}
+.rec-btn{width:50px;height:50px;border-radius:50%;background:rgba(248,113,113,.15);border:1px solid var(--red);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--red);transition:all .2s}
+.rec-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2}
+.rec-btn.on{background:var(--red);color:#fff;animation:pulse 1s infinite}
+#shadow-status{text-align:center;margin-top:10px;font-size:13px;color:var(--text3);min-height:18px}
+.prog-body{flex:1;overflow-y:auto;padding:0 16px 16px}
+.streak-card{background:linear-gradient(135deg,rgba(108,99,255,.2),rgba(167,139,250,.1));border:1px solid rgba(108,99,255,.3);border-radius:16px;padding:18px;margin-bottom:16px;display:flex;align-items:center;gap:16px}
+.streak-num{font-family:'Syne',sans-serif;font-size:36px;font-weight:800;color:var(--accent2)}
+.streak-sub{font-size:13px;color:var(--text2)}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:14px}
+.stat-val{font-family:'Syne',sans-serif;font-size:26px;font-weight:700;color:var(--accent2)}
+.stat-lab{font-size:12px;color:var(--text3);margin-top:3px}
+.sec-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:600;margin-bottom:10px}
+.day-dots{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:16px}
+.day-dot{width:34px;height:34px;border-radius:9px;border:1px solid var(--border);background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text3)}
+.day-dot.done{background:rgba(52,211,153,.15);border-color:var(--green);color:var(--green)}
+.day-dot.today{border-color:var(--accent);color:var(--accent)}
+.tip-card{background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+.tip-cat{font-size:10px;color:var(--accent2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px}
+.tip-body{font-size:13px;color:var(--text2);line-height:1.6}
+#toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:10px 18px;font-size:13px;color:var(--text);opacity:0;transition:all .3s;z-index:999;white-space:nowrap;pointer-events:none}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="screen active" id="chat-screen">
+    <div class="top-bar">
+      <h1>FluentAI</h1>
+      <span class="badge" id="mode-badge">💬 Free talk</span>
+    </div>
+    <div class="welcome-box" id="welcome-box">
+      <h2>Xin chào! 👋</h2>
+      <p>Chọn chế độ luyện tập phía dưới rồi bắt đầu. Nhấn mic 🎙️ để nói thay vì gõ!</p>
+    </div>
+    <div id="chat-messages"></div>
+    <div id="chat-input-area">
+      <div class="mode-chips">
+        <div class="chip active" onclick="setMode(this,'free','Free talk','Chat tự nhiên, AI sửa lỗi nhẹ nhàng.')">💬 Free</div>
+        <div class="chip" onclick="setMode(this,'correct','Correction','Sửa lỗi chi tiết từng câu.')">✏️ Sửa lỗi</div>
+        <div class="chip" onclick="setMode(this,'interview','Interview','Luyện phỏng vấn tiếng Anh.')">🎯 Phỏng vấn</div>
+        <div class="chip" onclick="setMode(this,'debate','Debate','Tranh luận để nói nhanh hơn.')">🔥 Tranh luận</div>
+        <div class="chip" onclick="setMode(this,'story','Storytelling','Kể chuyện, mở rộng từ vựng.')">📖 Kể chuyện</div>
+      </div>
+      <div class="input-row">
+        <button class="icon-btn" id="mic-btn" onclick="toggleMic()">
+          <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+        </button>
+        <textarea id="msg-input" rows="1" placeholder="Gõ tiếng Anh hoặc nhấn mic..."></textarea>
+        <button class="icon-btn" id="send-btn" onclick="sendMessage()">
+          <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen" id="shadow-screen">
+    <div class="top-bar"><h1>Shadowing</h1><span class="badge">🎙️ Luyện nói</span></div>
+    <div class="shadow-list" id="shadow-list"></div>
+  </div>
+
+  <div class="screen" id="progress-screen">
+    <div class="top-bar"><h1>Tiến độ</h1><span class="badge" id="day-badge">Ngày 1</span></div>
+    <div class="prog-body" id="prog-body"></div>
+  </div>
+
+  <nav id="nav">
+    <button class="nav-btn active" onclick="showScreen('chat-screen',this)">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Chat
+    </button>
+    <button class="nav-btn" onclick="showScreen('shadow-screen',this)">
+      <svg viewBox="0 0 24 24"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>Shadowing
+    </button>
+    <button class="nav-btn" onclick="showScreen('progress-screen',this)">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Tiến độ
+    </button>
+  </nav>
+</div>
+
+<div id="shadow-player">
+  <div class="player-header">
+    <div class="back-btn" onclick="closePlayer()">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </div>
+    <div class="player-title-text" id="player-title">-</div>
+  </div>
+  <div class="player-body" id="player-body"></div>
+  <div class="player-controls">
+    <div class="speed-row">
+      <span class="speed-label">Tốc độ</span>
+      <div class="speed-btns">
+        <button class="speed-btn" onclick="setSpeed(0.5,this)">0.5x</button>
+        <button class="speed-btn" onclick="setSpeed(0.75,this)">0.75x</button>
+        <button class="speed-btn active" onclick="setSpeed(1,this)">1.0x</button>
+        <button class="speed-btn" onclick="setSpeed(1.25,this)">1.25x</button>
+      </div>
+    </div>
+    <div class="ctrl-row">
+      <div class="rec-btn" id="rec-btn" onclick="toggleShadowRecord()">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="6" fill="currentColor" stroke="none"/></svg>
+      </div>
+      <div class="ctrl-btn ctrl-play" onclick="playCurrentSentence()">
+        <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor" stroke="none"/></svg>
+      </div>
+      <div class="ctrl-btn" onclick="repeatCurrent()">
+        <svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+      </div>
+    </div>
+    <div id="shadow-status"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+var MODES = {
+  free: { emoji:'💬', system:'You are an English conversation coach for a Vietnamese learner. Have natural conversations in English. After your reply, if the user made mistakes, add a brief "Tip:" with ONE correction. Keep replies 2-4 sentences. Be encouraging.' },
+  correct: { emoji:'✏️', system:'You are a strict English grammar coach for a Vietnamese learner. For every message: 1) Correct ALL mistakes with explanation. 2) Show corrected version. 3) Respond naturally. Be thorough but concise.' },
+  interview: { emoji:'🎯', system:'You are an English job interview coach. Ask one interview question at a time. After the answer, give brief feedback on clarity, vocabulary, structure. Then ask next question. Topics: experience, strengths, goals.' },
+  debate: { emoji:'🔥', system:'You are an English debate partner for a Vietnamese learner. Pick a topic and argue the opposite side. Challenge points respectfully. Help them think fast in English. Correct major grammar gently.' },
+  story: { emoji:'📖', system:'You are an English storytelling coach. Build collaborative stories turn by turn. After each contribution, continue the story AND suggest 2-3 advanced vocabulary words they could use. Correct grammar gently.' }
+};
+
+var LESSONS = [
+  { cat:'Cơ bản', title:'Giới thiệu bản thân', level:'Dễ', time:'2 phút',
+    sentences:[
+      {text:"Hi! My name is David and I'm from Hanoi, Vietnam.", ph:"/haɪ/ /maɪ/ /neɪm/ /ɪz/ /deɪvɪd/"},
+      {text:"I've been learning English for about two years now.", ph:"/aɪv/ /biːn/ /lɜːrnɪŋ/ /ˈɪŋɡlɪʃ/"},
+      {text:"In my free time, I enjoy watching movies and listening to podcasts.", ph:"/ɪn/ /maɪ/ /friː/ /taɪm/"},
+      {text:"I'm really excited to improve my English speaking skills.", ph:"/aɪm/ /ˈrɪəli/ /ɪkˈsaɪtɪd/"}
+    ]
+  },
+  { cat:'Giao tiếp', title:'Đặt đồ ăn tại nhà hàng', level:'Dễ', time:'2 phút',
+    sentences:[
+      {text:"Excuse me, could I see the menu, please?", ph:"/ɪkˈskjuːz/ /miː/ /kʊd/ /aɪ/"},
+      {text:"I'd like to order the grilled chicken with vegetables.", ph:"/aɪd/ /laɪk/ /tuː/ /ˈɔːrdər/"},
+      {text:"Could you make it a little less spicy?", ph:"/kʊd/ /juː/ /meɪk/ /ɪt/"},
+      {text:"That was absolutely delicious! Could we have the check, please?", ph:"/ˈæbsəluːtli/ /dɪˈlɪʃəs/"}
+    ]
+  },
+  { cat:'Công việc', title:'Họp online tiếng Anh', level:'Trung bình', time:'3 phút',
+    sentences:[
+      {text:"Good morning everyone. Thank you for joining today's meeting.", ph:"/ɡʊd/ /ˈmɔːrnɪŋ/ /ˈevriˌwʌn/"},
+      {text:"Let me quickly go over today's agenda before we get started.", ph:"/let/ /miː/ /ˈkwɪkli/ /ɡoʊ/"},
+      {text:"I'd like to highlight three key points from last quarter.", ph:"/aɪd/ /laɪk/ /tuː/ /ˈhaɪlaɪt/"},
+      {text:"Does anyone have any questions before we move on?", ph:"/dʌz/ /ˈeniˌwʌn/ /hæv/"},
+      {text:"Let's schedule a follow-up meeting to discuss this further.", ph:"/lets/ /ˈskɛdʒuːl/"}
+    ]
+  },
+  { cat:'Nâng cao', title:'TED Talk: Passion & Success', level:'Khó', time:'3 phút',
+    sentences:[
+      {text:"The secret to success isn't talent — it's the relentless pursuit of passion.", ph:"/ðə/ /ˈsiːkrɪt/ /tuː/ /səkˈsɛs/"},
+      {text:"Every great achievement begins with the decision to try one more time.", ph:"/ˈevri/ /ɡreɪt/ /əˈtʃiːvmənt/"},
+      {text:"What separates extraordinary people is not their circumstances, but their mindset.", ph:"/wɒt/ /ˈsɛpəreɪts/"},
+      {text:"Embrace failure as a stepping stone, not a stumbling block.", ph:"/ɪmˈbreɪs/ /ˈfeɪljər/"}
+    ]
+  },
+  { cat:'Đời sống', title:'Kể chuyện cuối tuần', level:'Trung bình', time:'2 phút',
+    sentences:[
+      {text:"Last weekend was absolutely fantastic — I couldn't have asked for better.", ph:"/læst/ /ˈwiːkˌɛnd/ /ˈæbsəluːtli/"},
+      {text:"My friends and I decided to take a spontaneous road trip to the mountains.", ph:"/spɒnˈteɪniəs/ /roʊd/ /trɪp/"},
+      {text:"The scenery was breathtaking — lush green valleys and crystal clear streams.", ph:"/ðə/ /ˈsiːnəri/ /ˈbrɛθˌteɪkɪŋ/"},
+      {text:"I definitely want to go back there before the rainy season.", ph:"/ˈdɛfɪnɪtli/ /wɒnt/"}
+    ]
+  }
+];
+
+var currentMode = 'free';
+var chatHistory = [];
+var recognition = null;
+var isRecording = false;
+var currentSpeed = 1;
+var shadowRecorder = null;
+var shadowRecording = false;
+var currentSentIdx = 0;
+var currentLesson = null;
+var stats = JSON.parse(localStorage.getItem('fluentStats') || '{"days":0,"messages":0,"shadows":0,"streak":0,"lastDate":""}');
+
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 2500);
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+function showScreen(id, btn) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  document.querySelectorAll('.nav-btn').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'progress-screen') renderProgress();
+  if (id === 'shadow-screen') renderShadowList();
+}
+
+function saveStats() { localStorage.setItem('fluentStats', JSON.stringify(stats)); }
+
+function escHtml(t) { return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function setMode(el, mode, label, desc) {
+  currentMode = mode;
+  document.querySelectorAll('.chip').forEach(function(c) { c.classList.remove('active'); });
+  el.classList.add('active');
+  document.getElementById('mode-badge').textContent = MODES[mode].emoji + ' ' + label;
+  chatHistory = [];
+  document.getElementById('chat-messages').innerHTML = '';
+  var wb = document.getElementById('welcome-box');
+  if (wb) wb.remove();
+  addMsg('ai', MODES[mode].emoji + ' <strong>' + label + '</strong><br><span style="font-size:13px;color:var(--text2)">' + desc + '</span>', null);
+}
+
+function addMsg(role, html, ttsText) {
+  var wrap = document.createElement('div');
+  wrap.className = 'msg ' + role;
+  var bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  bubble.innerHTML = html;
+  wrap.appendChild(bubble);
+  if (role === 'ai' && ttsText) {
+    var btn = document.createElement('button');
+    btn.className = 'speak-again';
+    btn.innerHTML = '<svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg> Nghe lại';
+    (function(txt) { btn.onclick = function() { ttsSpeak(txt); }; })(ttsText);
+    wrap.appendChild(btn);
+  }
+  document.getElementById('chat-messages').appendChild(wrap);
+  wrap.scrollIntoView({behavior:'smooth', block:'end'});
+}
+
+function showTyping() {
+  var el = document.createElement('div');
+  el.className = 'msg ai'; el.id = 'typing-msg';
+  el.innerHTML = '<div class="typing-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
+  document.getElementById('chat-messages').appendChild(el);
+  el.scrollIntoView({behavior:'smooth', block:'end'});
+}
+function removeTyping() { var el = document.getElementById('typing-msg'); if (el) el.remove(); }
+
+function formatReply(text) {
+  return text.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>');
+}
+
+async function sendMessage() {
+  var input = document.getElementById('msg-input');
+  var text = input.value.trim();
+  if (!text) return;
+  var wb = document.getElementById('welcome-box');
+  if (wb) wb.remove();
+  input.value = ''; input.style.height = 'auto';
+  addMsg('user', escHtml(text), null);
+  chatHistory.push({role:'user', content:text});
+  showTyping();
+  stats.messages++; saveStats();
+  try {
+    var res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:600,system:MODES[currentMode].system,messages:chatHistory})
+    });
+    var data = await res.json();
+    removeTyping();
+    var reply = (data.content && data.content[0] && data.content[0].text) ? data.content[0].text : 'Sorry, something went wrong.';
+    chatHistory.push({role:'assistant', content:reply});
+    var plain = reply.replace(/\*\*(.+?)\*\*/g,'$1').replace(/\n/g,' ').substring(0,300);
+    addMsg('ai', formatReply(reply), plain);
+    ttsSpeak(plain);
+  } catch(e) {
+    removeTyping();
+    addMsg('ai', '⚠️ Lỗi kết nối. Kiểm tra internet và thử lại nhé.', null);
+  }
+}
+
+function ttsSpeak(text) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  var utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'en-US'; utter.rate = 0.9; utter.pitch = 1;
+  var voices = speechSynthesis.getVoices();
+  var v = voices.filter(function(v){return v.lang.startsWith('en-US');})[0] || voices.filter(function(v){return v.lang.startsWith('en');})[0];
+  if (v) utter.voice = v;
+  speechSynthesis.speak(utter);
+}
+
+function toggleMic() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) { showToast('Dùng Chrome để bật mic!'); return; }
+  if (isRecording) { if (recognition) recognition.stop(); return; }
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
+  recognition.lang = 'en-US'; recognition.continuous = false; recognition.interimResults = true;
+  recognition.onstart = function() { isRecording=true; document.getElementById('mic-btn').classList.add('recording'); showToast('🎙️ Đang nghe...'); };
+  recognition.onresult = function(e) {
+    var fin='',int='';
+    for (var i=0;i<e.results.length;i++){if(e.results[i].isFinal)fin+=e.results[i][0].transcript;else int+=e.results[i][0].transcript;}
+    var el=document.getElementById('msg-input'); el.value=fin||int; autoResize(el);
+  };
+  recognition.onend = function() {
+    isRecording=false; document.getElementById('mic-btn').classList.remove('recording');
+    var val=document.getElementById('msg-input').value.trim(); if(val)sendMessage();
+  };
+  recognition.onerror = function(e) { isRecording=false; document.getElementById('mic-btn').classList.remove('recording'); showToast('Mic error: '+e.error); };
+  recognition.start();
+}
+
+function renderShadowList() {
+  var html = LESSONS.map(function(l,i){
+    return '<div class="shadow-card" onclick="openLesson('+i+')">' +
+      '<div class="s-cat">'+l.cat+'</div><div class="s-title">'+l.title+'</div>' +
+      '<div class="s-preview">'+l.sentences[0].text+'</div>' +
+      '<div class="s-meta"><span class="meta-pill">'+l.level+'</span><span class="meta-pill">⏱ '+l.time+'</span><span class="meta-pill">📝 '+l.sentences.length+' câu</span></div></div>';
+  }).join('');
+  document.getElementById('shadow-list').innerHTML = html;
+}
+
+function openLesson(idx) {
+  currentLesson = LESSONS[idx]; currentSentIdx = 0;
+  document.getElementById('player-title').textContent = currentLesson.title;
+  renderPlayerBody();
+  document.getElementById('shadow-player').classList.add('open');
+}
+
+function renderPlayerBody() {
+  var html = '<div class="script-label">Nhấn ▶ để nghe · Nói theo đồng thời · ◎ để ghi âm giọng mình</div>';
+  currentLesson.sentences.forEach(function(s,i){
+    html += '<div class="sent-block" id="sent-'+i+'"><div class="sent-text'+(i===currentSentIdx?' active':'')+'">'+s.text+'</div><div class="phonetic">'+s.ph+'</div></div>';
+  });
+  document.getElementById('player-body').innerHTML = html;
+}
+
+function highlightSent(idx) {
+  document.querySelectorAll('.sent-text').forEach(function(el,i){ el.classList.toggle('active', i===idx); });
+  var b = document.getElementById('sent-'+idx); if(b) b.scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+function playCurrentSentence() {
+  if (!currentLesson) return;
+  var s = currentLesson.sentences[currentSentIdx]; if (!s) return;
+  highlightSent(currentSentIdx); shadowSpeak(s.text);
+}
+
+function shadowSpeak(text) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  var utter = new SpeechSynthesisUtterance(text);
+  utter.lang='en-US'; utter.rate=currentSpeed; utter.pitch=1;
+  var voices=speechSynthesis.getVoices();
+  var v=voices.filter(function(v){return v.lang.startsWith('en-US');})[0]||voices.filter(function(v){return v.lang.startsWith('en');})[0];
+  if(v) utter.voice=v;
+  utter.onend = function() {
+    document.getElementById('shadow-status').textContent = '▶ Bây giờ anh nói lại!';
+    setTimeout(function(){
+      document.getElementById('shadow-status').textContent = '';
+      if(currentLesson && currentSentIdx < currentLesson.sentences.length-1){ currentSentIdx++; highlightSent(currentSentIdx); }
+    }, 2500);
+  };
+  speechSynthesis.speak(utter);
+  stats.shadows++; saveStats();
+}
+
+function repeatCurrent() { if(currentLesson){ var s=currentLesson.sentences[currentSentIdx]; if(s) shadowSpeak(s.text); } }
+
+function setSpeed(s,btn) {
+  currentSpeed=s;
+  document.querySelectorAll('.speed-btn').forEach(function(b){b.classList.remove('active');}); btn.classList.add('active');
+}
+
+function toggleShadowRecord() {
+  var btn=document.getElementById('rec-btn'), status=document.getElementById('shadow-status');
+  if (!shadowRecording) {
+    navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
+      shadowRecorder=new MediaRecorder(stream); var chunks=[];
+      shadowRecorder.ondataavailable=function(e){chunks.push(e.data);};
+      shadowRecorder.onstop=function(){ stream.getTracks().forEach(function(t){t.stop();}); showToast('✅ Đang phát lại giọng anh...'); var blob=new Blob(chunks,{type:'audio/webm'}); new Audio(URL.createObjectURL(blob)).play(); };
+      shadowRecorder.start(); shadowRecording=true; btn.classList.add('on'); status.textContent='🔴 Đang ghi âm...';
+    }).catch(function(){ showToast('Không thể truy cập mic'); });
+  } else { shadowRecorder.stop(); shadowRecording=false; btn.classList.remove('on'); status.textContent=''; }
+}
+
+function closePlayer() {
+  document.getElementById('shadow-player').classList.remove('open');
+  window.speechSynthesis.cancel();
+  if(shadowRecording&&shadowRecorder){shadowRecorder.stop();shadowRecording=false;}
+  currentSentIdx=0; currentLesson=null;
+}
+
+function updateStreak() {
+  var today=new Date().toDateString();
+  if(stats.lastDate!==today){
+    var yest=new Date(Date.now()-86400000).toDateString();
+    stats.streak = stats.lastDate===yest ? stats.streak+1 : 1;
+    stats.days=Math.min(stats.days+1,30); stats.lastDate=today; saveStats();
+  }
+}
+
+function renderProgress() {
+  updateStreak();
+  document.getElementById('day-badge').textContent='Ngày '+stats.days;
+  var tips=[
+    {cat:'Shadowing',tip:'Lặp mỗi câu ít nhất 5 lần. Bắt đầu 0.75x, tăng lên 1.0x khi quen.'},
+    {cat:'Luyện nói',tip:'Ghi âm giọng mình mỗi ngày rồi nghe lại. Dở lúc đầu là bình thường!'},
+    {cat:'Từ vựng',tip:'Học theo cụm (make a decision) thay vì từ đơn. Hiệu quả hơn gấp 3 lần.'},
+    {cat:'Tư duy',tip:'Thấy vật gì, nghĩ tên tiếng Anh ngay. Sau 3-4 tuần não sẽ tự chuyển.'},
+    {cat:'Phát âm',tip:'Chú ý word stress. Sai trọng âm nghe rất kỳ dù đúng từ.'}
+  ];
+  var dots=Array.from({length:30},function(_,i){ var c=i<stats.days?'done':(i===stats.days?'today':''); return '<div class="day-dot '+c+'">'+(i+1)+'</div>'; }).join('');
+  document.getElementById('prog-body').innerHTML=
+    '<div class="streak-card"><div style="font-size:38px">🔥</div><div><div class="streak-num">'+stats.streak+'</div><div class="streak-sub">ngày liên tiếp</div></div></div>'+
+    '<div class="stat-grid">'+
+      '<div class="stat-card"><div class="stat-val">'+stats.messages+'</div><div class="stat-lab">Tin nhắn chat</div></div>'+
+      '<div class="stat-card"><div class="stat-val">'+stats.shadows+'</div><div class="stat-lab">Câu shadowing</div></div>'+
+      '<div class="stat-card"><div class="stat-val">'+stats.days+'</div><div class="stat-lab">Ngày học</div></div>'+
+      '<div class="stat-card"><div class="stat-val">'+Math.round(stats.days/30*100)+'%</div><div class="stat-lab">Lộ trình 30 ngày</div></div>'+
+    '</div>'+
+    '<div class="sec-title">30 ngày lộ trình</div><div class="day-dots">'+dots+'</div>'+
+    '<div class="sec-title">Mẹo học hiệu quả</div>'+
+    tips.map(function(t){return '<div class="tip-card"><div class="tip-cat">'+t.cat+'</div><div class="tip-body">'+t.tip+'</div></div>';}).join('');
+}
+
+// attach events after DOM ready
+document.addEventListener('DOMContentLoaded', function() {
+  var inp = document.getElementById('msg-input');
+  inp.addEventListener('input', function(){ autoResize(this); });
+  inp.addEventListener('keydown', function(e){ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();} });
+});
+
+speechSynthesis.onvoiceschanged = function(){ speechSynthesis.getVoices(); };
+updateStreak();
+renderShadowList();
+
+setTimeout(function(){
+  var wb=document.getElementById('welcome-box');
+  if(wb && document.getElementById('chat-messages').children.length===0){
+    addMsg('ai',"👋 Hi! I'm your English AI Coach.<br><br>Choose a mode above and let's start practicing! Tap the mic 🎙️ to speak instead of typing.<br><br><em style='color:var(--text3);font-size:13px'>Chọn chế độ ở trên để bắt đầu luyện nhé anh!</em>","Hi! I'm your English AI Coach. Choose a mode and let's start!");
+  }
+},400);
+</script>
+</body>
+</html>
