@@ -9,151 +9,222 @@
 <title>FluentAI — English Coach</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#0a0a0f;--bg2:#111118;--bg3:#1a1a25;--bg4:#22222f;
-  --accent:#6c63ff;--accent2:#a78bfa;
-  --green:#34d399;--orange:#fb923c;--red:#f87171;
-  --text:#f0f0ff;--text2:#9090b0;--text3:#5a5a78;
-  --border:rgba(255,255,255,0.07);
-}
+:root{--bg:#0a0a0f;--bg2:#111118;--bg3:#1a1a25;--bg4:#22222f;--accent:#6c63ff;--accent2:#a78bfa;--green:#34d399;--orange:#fb923c;--red:#f87171;--text:#f0f0ff;--text2:#9090b0;--text3:#5a5a78;--border:rgba(255,255,255,0.07)}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif}
 #app{height:100dvh;display:flex;flex-direction:column;max-width:480px;margin:0 auto}
-#nav{display:flex;background:var(--bg2);border-top:1px solid var(--border);padding:8px 0 max(8px,env(safe-area-inset-bottom));flex-shrink:0}
-.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px;border:none;background:none;color:var(--text3);font-family:'DM Sans',sans-serif;font-size:10px;cursor:pointer;transition:color .2s}
-.nav-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#nav{display:flex;background:var(--bg2);border-top:1px solid var(--border);padding:6px 0 max(6px,env(safe-area-inset-bottom));flex-shrink:0}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 2px;border:none;background:none;color:var(--text3);font-family:'DM Sans',sans-serif;font-size:9px;cursor:pointer;transition:color .2s}
+.nav-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .nav-btn.active{color:var(--accent2)}
 .screen{display:none;flex:1;flex-direction:column;overflow:hidden}
 .screen.active{display:flex}
-.top-bar{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;flex-shrink:0}
-.top-bar h1{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;background:linear-gradient(135deg,#a78bfa,#6c63ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.badge{font-size:11px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:4px 10px;color:var(--text2)}
-#chat-messages{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth}
-.msg{max-width:85%;animation:fadeUp .25s ease}
-@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.top-bar{display:flex;align-items:center;justify-content:space-between;padding:14px 18px 10px;flex-shrink:0}
+.top-bar h1{font-family:'Syne',sans-serif;font-size:19px;font-weight:700;background:linear-gradient(135deg,#a78bfa,#6c63ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.badge{font-size:11px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:3px 10px;color:var(--text2)}
+
+/* CHAT */
+#chat-messages{flex:1;overflow-y:auto;padding:10px 14px;display:flex;flex-direction:column;gap:9px;scroll-behavior:smooth}
+.msg{max-width:86%;animation:fadeUp .22s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
 .msg.user{align-self:flex-end}
 .msg.ai{align-self:flex-start}
-.bubble{padding:10px 14px;border-radius:18px;font-size:15px;line-height:1.55}
+.bubble{padding:10px 14px;border-radius:18px;font-size:14px;line-height:1.55}
 .msg.user .bubble{background:var(--accent);color:#fff;border-bottom-right-radius:4px}
 .msg.ai .bubble{background:var(--bg3);color:var(--text);border-bottom-left-radius:4px;border:1px solid var(--border)}
-.speak-again{background:none;border:1px solid var(--border);border-radius:10px;padding:4px 10px;font-size:11px;color:var(--text2);cursor:pointer;margin-top:6px;display:flex;align-items:center;gap:5px;transition:all .2s}
-.speak-again:hover{border-color:var(--accent2);color:var(--accent2)}
-.speak-again svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+.msg-actions{display:flex;gap:6px;margin-top:5px;flex-wrap:wrap}
+.act-btn{background:none;border:1px solid var(--border);border-radius:8px;padding:3px 9px;font-size:11px;color:var(--text3);cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif}
+.act-btn:hover{border-color:var(--accent2);color:var(--accent2)}
+.correction-box{background:rgba(251,146,60,0.08);border:1px solid rgba(251,146,60,0.25);border-radius:10px;padding:8px 12px;margin-top:6px;font-size:12px;color:var(--orange);line-height:1.6}
+.vocab-chip{display:inline-block;background:rgba(108,99,255,0.15);border:1px solid rgba(108,99,255,0.3);border-radius:6px;padding:2px 7px;font-size:11px;color:var(--accent2);margin:2px;cursor:pointer}
 .typing-dots{display:flex;align-items:center;gap:5px;padding:10px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:18px;border-bottom-left-radius:4px;width:fit-content}
-.dot{width:7px;height:7px;background:var(--text3);border-radius:50%;animation:bounce 1.2s infinite}
-.dot:nth-child(2){animation-delay:.2s}
-.dot:nth-child(3){animation-delay:.4s}
-@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
-#chat-input-area{padding:10px 16px;padding-bottom:max(12px,env(safe-area-inset-bottom));background:var(--bg);border-top:1px solid var(--border);flex-shrink:0}
-.input-row{display:flex;gap:8px;align-items:flex-end}
-#msg-input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:10px 16px;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--text);resize:none;max-height:100px;outline:none;line-height:1.4;transition:border-color .2s}
+.dot{width:6px;height:6px;background:var(--text3);border-radius:50%;animation:bounce 1.2s infinite}
+.dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
+
+/* INPUT */
+#chat-input-area{padding:8px 14px;padding-bottom:max(10px,env(safe-area-inset-bottom));background:var(--bg);border-top:1px solid var(--border);flex-shrink:0}
+.input-row{display:flex;gap:7px;align-items:flex-end}
+#msg-input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:9px 14px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);resize:none;max-height:90px;outline:none;line-height:1.4;transition:border-color .2s}
 #msg-input:focus{border-color:var(--accent)}
 #msg-input::placeholder{color:var(--text3)}
-.icon-btn{width:42px;height:42px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
-.icon-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.icon-btn{width:40px;height:40px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
+.icon-btn svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 #send-btn{background:var(--accent);color:#fff}
 #send-btn:active{transform:scale(.92)}
 #mic-btn{background:var(--bg3);border:1px solid var(--border);color:var(--text2)}
 #mic-btn.recording{background:var(--red);border-color:var(--red);color:#fff;animation:pulse 1s infinite}
-@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(248,113,113,.4)}50%{box-shadow:0 0 0 8px rgba(248,113,113,0)}}
-.mode-chips{display:flex;gap:6px;margin-bottom:8px;overflow-x:auto;padding-bottom:2px}
+#voice-loop-btn{background:var(--bg3);border:1px solid var(--border);color:var(--text2)}
+#voice-loop-btn.active{background:rgba(52,211,153,0.15);border-color:var(--green);color:var(--green)}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(248,113,113,.4)}50%{box-shadow:0 0 0 7px rgba(248,113,113,0)}}
+.mode-chips{display:flex;gap:5px;margin-bottom:7px;overflow-x:auto;padding-bottom:1px}
 .mode-chips::-webkit-scrollbar{display:none}
-.chip{flex-shrink:0;font-size:12px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif}
+.chip{flex-shrink:0;font-size:11px;padding:4px 11px;border-radius:20px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
 .chip.active{background:var(--accent);border-color:var(--accent);color:#fff}
-.welcome-box{margin:12px 16px;background:linear-gradient(135deg,rgba(108,99,255,.15),rgba(167,139,250,.08));border:1px solid rgba(108,99,255,.2);border-radius:16px;padding:16px}
-.welcome-box h2{font-family:'Syne',sans-serif;font-size:16px;font-weight:600;margin-bottom:6px}
-.welcome-box p{font-size:13px;color:var(--text2);line-height:1.6}
-.shadow-list{flex:1;overflow-y:auto;padding:0 16px 16px}
-.shadow-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:18px;margin-bottom:14px;cursor:pointer;transition:all .25s;position:relative;overflow:hidden}
+.voice-status{text-align:center;font-size:12px;color:var(--accent2);padding:4px 0;min-height:20px}
+
+/* PRONUNCIATION SCORE */
+.score-box{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:10px 14px;margin-top:6px}
+.score-title{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.score-row{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.score-label{font-size:12px;color:var(--text2);min-width:70px}
+.score-bar{flex:1;height:6px;background:var(--bg4);border-radius:3px;overflow:hidden}
+.score-fill{height:100%;border-radius:3px;transition:width .6s ease}
+.score-num{font-size:12px;font-weight:500;min-width:30px;text-align:right}
+.word-scores{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.word-score{font-size:12px;padding:2px 7px;border-radius:6px;cursor:help}
+.ws-good{background:rgba(52,211,153,0.15);color:var(--green)}
+.ws-ok{background:rgba(251,146,60,0.15);color:var(--orange)}
+.ws-bad{background:rgba(248,113,113,0.15);color:var(--red)}
+
+/* FLASHCARD */
+#flash-screen{background:var(--bg)}
+.flash-body{flex:1;overflow-y:auto;padding:0 16px 16px}
+.flash-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.flash-count{font-size:13px;color:var(--text3)}
+.flash-card-wrap{perspective:1000px;margin-bottom:16px}
+.flash-card{width:100%;min-height:200px;position:relative;transform-style:preserve-3d;transition:transform .5s;cursor:pointer;border-radius:20px}
+.flash-card.flipped{transform:rotateY(180deg)}
+.flash-face{position:absolute;inset:0;backface-visibility:hidden;border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 20px;border:1px solid var(--border)}
+.flash-front{background:linear-gradient(135deg,rgba(108,99,255,0.15),rgba(167,139,250,0.08));border-color:rgba(108,99,255,0.25)}
+.flash-back{background:var(--bg2);transform:rotateY(180deg)}
+.flash-word{font-family:'Syne',sans-serif;font-size:28px;font-weight:700;color:var(--text);text-align:center;margin-bottom:8px}
+.flash-phonetic{font-size:14px;color:var(--accent2);font-style:italic;margin-bottom:6px}
+.flash-context{font-size:13px;color:var(--text3);text-align:center;font-style:italic}
+.flash-meaning{font-size:18px;color:var(--text);text-align:center;margin-bottom:10px;font-weight:500}
+.flash-example{font-size:13px;color:var(--text2);text-align:center;line-height:1.6}
+.flash-actions{display:flex;gap:10px;margin-bottom:14px}
+.flash-btn{flex:1;padding:12px;border-radius:14px;border:none;font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
+.flash-bad{background:rgba(248,113,113,0.15);color:var(--red);border:1px solid rgba(248,113,113,0.3)}
+.flash-ok{background:rgba(251,146,60,0.15);color:var(--orange);border:1px solid rgba(251,146,60,0.3)}
+.flash-good{background:rgba(52,211,153,0.15);color:var(--green);border:1px solid rgba(52,211,153,0.3)}
+.flash-speak-btn{width:100%;padding:11px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;color:var(--text2);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;margin-bottom:10px}
+.no-cards{text-align:center;padding:48px 20px;color:var(--text3);font-size:14px;line-height:1.8}
+.no-cards div{font-size:40px;margin-bottom:14px}
+
+/* SHADOWING */
+.shadow-list{flex:1;overflow-y:auto;padding:0 14px 14px}
+.shadow-card{background:var(--bg2);border:1px solid var(--border);border-radius:18px;padding:16px;margin-bottom:12px;cursor:pointer;position:relative;overflow:hidden;transition:all .2s}
 .shadow-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
 .shadow-card:active{transform:scale(.98)}
-.s-cat{font-size:11px;color:var(--accent2);font-weight:500;text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px}
-.s-title{font-family:'Syne',sans-serif;font-size:17px;font-weight:600;margin-bottom:6px}
+.s-cat{font-size:11px;color:var(--accent2);font-weight:500;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+.s-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:600;margin-bottom:5px}
 .s-preview{font-size:13px;color:var(--text2);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.s-meta{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
-.meta-pill{font-size:11px;padding:3px 10px;background:var(--bg4);border-radius:20px;color:var(--text3)}
+.s-meta{display:flex;gap:7px;margin-top:9px;flex-wrap:wrap}
+.meta-pill{font-size:11px;padding:2px 9px;background:var(--bg4);border-radius:20px;color:var(--text3)}
 #shadow-player{position:fixed;inset:0;background:var(--bg);z-index:100;display:none;flex-direction:column}
 #shadow-player.open{display:flex}
-.player-header{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--border);flex-shrink:0}
-.back-btn{width:36px;height:36px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2)}
-.back-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.player-title-text{font-family:'Syne',sans-serif;font-size:15px;font-weight:600;flex:1}
-.player-body{flex:1;overflow-y:auto;padding:20px}
-.script-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;line-height:1.5}
-.sent-block{margin-bottom:14px}
-.sent-text{font-size:17px;line-height:1.7;color:var(--text);background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:14px 16px;transition:all .3s}
+.player-header{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--border);flex-shrink:0}
+.back-btn{width:34px;height:34px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2)}
+.back-btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.player-body{flex:1;overflow-y:auto;padding:18px}
+.script-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;line-height:1.5}
+.sent-block{margin-bottom:13px}
+.sent-text{font-size:16px;line-height:1.7;color:var(--text);background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:13px 15px;transition:all .3s}
 .sent-text.active{border-color:var(--accent);background:rgba(108,99,255,.08)}
-.phonetic{font-size:12px;color:var(--accent2);margin-top:5px;padding:0 4px;font-style:italic}
-.player-controls{padding:16px 20px;padding-bottom:max(16px,env(safe-area-inset-bottom));border-top:1px solid var(--border);flex-shrink:0}
-.speed-row{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.phonetic{font-size:11px;color:var(--accent2);margin-top:4px;padding:0 4px;font-style:italic}
+.player-controls{padding:14px 18px;padding-bottom:max(14px,env(safe-area-inset-bottom));border-top:1px solid var(--border);flex-shrink:0}
+.speed-row{display:flex;align-items:center;gap:8px;margin-bottom:12px}
 .speed-label{font-size:12px;color:var(--text3);min-width:44px}
-.speed-btns{display:flex;gap:6px}
-.speed-btn{font-size:12px;padding:5px 11px;border-radius:20px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif}
+.speed-btns{display:flex;gap:5px}
+.speed-btn{font-size:12px;padding:4px 10px;border-radius:20px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s}
 .speed-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
-.ctrl-row{display:flex;gap:12px;align-items:center;justify-content:center}
-.ctrl-btn{width:50px;height:50px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);transition:all .2s}
-.ctrl-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
-.ctrl-play{width:62px;height:62px;background:var(--accent);border-color:var(--accent);color:#fff}
+.ctrl-row{display:flex;gap:10px;align-items:center;justify-content:center}
+.ctrl-btn{width:48px;height:48px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2)}
+.ctrl-btn svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+.ctrl-play{width:60px;height:60px;background:var(--accent);border-color:var(--accent);color:#fff}
 .ctrl-play svg{width:22px;height:22px}
-.rec-btn{width:50px;height:50px;border-radius:50%;background:rgba(248,113,113,.15);border:1px solid var(--red);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--red);transition:all .2s}
-.rec-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2}
+.rec-btn{width:48px;height:48px;border-radius:50%;background:rgba(248,113,113,.12);border:1px solid var(--red);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--red)}
 .rec-btn.on{background:var(--red);color:#fff;animation:pulse 1s infinite}
-#shadow-status{text-align:center;margin-top:10px;font-size:13px;color:var(--text3);min-height:18px}
-.prog-body{flex:1;overflow-y:auto;padding:0 16px 16px}
-.streak-card{background:linear-gradient(135deg,rgba(108,99,255,.2),rgba(167,139,250,.1));border:1px solid rgba(108,99,255,.3);border-radius:16px;padding:18px;margin-bottom:16px;display:flex;align-items:center;gap:16px}
-.streak-num{font-family:'Syne',sans-serif;font-size:36px;font-weight:800;color:var(--accent2)}
+#shadow-status{text-align:center;margin-top:9px;font-size:12px;color:var(--text3);min-height:16px}
+
+/* PROGRESS */
+.prog-body{flex:1;overflow-y:auto;padding:0 14px 14px}
+.streak-card{background:linear-gradient(135deg,rgba(108,99,255,.2),rgba(167,139,250,.08));border:1px solid rgba(108,99,255,.3);border-radius:16px;padding:16px;margin-bottom:14px;display:flex;align-items:center;gap:14px}
+.streak-num{font-family:'Syne',sans-serif;font-size:34px;font-weight:800;color:var(--accent2)}
 .streak-sub{font-size:13px;color:var(--text2)}
-.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
-.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:14px}
-.stat-val{font-family:'Syne',sans-serif;font-size:26px;font-weight:700;color:var(--accent2)}
-.stat-lab{font-size:12px;color:var(--text3);margin-top:3px}
-.sec-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:600;margin-bottom:10px}
-.day-dots{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:16px}
-.day-dot{width:34px;height:34px;border-radius:9px;border:1px solid var(--border);background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text3)}
-.day-dot.done{background:rgba(52,211,153,.15);border-color:var(--green);color:var(--green)}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:14px}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:13px;padding:13px}
+.stat-val{font-family:'Syne',sans-serif;font-size:24px;font-weight:700;color:var(--accent2)}
+.stat-lab{font-size:11px;color:var(--text3);margin-top:2px}
+.sec-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:600;margin-bottom:9px}
+.day-dots{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:14px}
+.day-dot{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text3)}
+.day-dot.done{background:rgba(52,211,153,.12);border-color:var(--green);color:var(--green)}
 .day-dot.today{border-color:var(--accent);color:var(--accent)}
-.tip-card{background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:12px;padding:12px 14px;margin-bottom:10px}
-.tip-cat{font-size:10px;color:var(--accent2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px}
+.tip-card{background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:11px;padding:11px 13px;margin-bottom:9px}
+.tip-cat{font-size:10px;color:var(--accent2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px}
 .tip-body{font-size:13px;color:var(--text2);line-height:1.6}
-#api-modal{position:fixed;inset:0;background:rgba(10,10,15,0.95);z-index:200;display:none;flex-direction:column;align-items:center;justify-content:center;padding:32px}
-#api-modal.open{display:flex}
-.api-box{background:#1a1a25;border:1px solid rgba(108,99,255,0.3);border-radius:20px;padding:28px 24px;width:100%;max-width:360px}
-.api-box h2{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:#f0f0ff;margin-bottom:8px}
-.api-box p{font-size:13px;color:#9090b0;line-height:1.6;margin-bottom:20px}
-.api-input{width:100%;background:#111118;border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 16px;font-size:14px;color:#f0f0ff;font-family:'DM Sans',sans-serif;outline:none;margin-bottom:12px}
-.api-input:focus{border-color:#6c63ff}
-.api-save-btn{width:100%;padding:13px;background:#6c63ff;border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif}
-.api-save-btn:active{opacity:0.85}
-.api-link{display:block;text-align:center;margin-top:14px;font-size:12px;color:#6c63ff;text-decoration:none}
-#toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:10px 18px;font-size:13px;color:var(--text);opacity:0;transition:all .3s;z-index:999;white-space:nowrap;pointer-events:none}
+
+/* SETTINGS */
+.settings-body{flex:1;overflow-y:auto;padding:0 14px 14px}
+.settings-section{margin-bottom:20px}
+.settings-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:600;margin-bottom:10px}
+.settings-row{background:var(--bg2);border:1px solid var(--border);border-radius:13px;padding:13px 15px;display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
+.settings-label{font-size:14px;color:var(--text)}
+.settings-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.toggle{width:44px;height:25px;border-radius:13px;background:var(--bg4);border:none;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
+.toggle.on{background:#6c63ff}
+.toggle::after{content:'';position:absolute;width:19px;height:19px;border-radius:50%;background:#fff;top:3px;left:3px;transition:transform .2s}
+.toggle.on::after{transform:translateX(19px)}
+.rate-row{display:flex;align-items:center;gap:8px}
+.rate-val{font-size:13px;color:var(--accent2);min-width:34px;text-align:right}
+input[type=range]{flex:1;accent-color:#6c63ff;width:90px}
+.voice-grid{display:flex;flex-direction:column;gap:7px}
+.voice-card{background:var(--bg2);border:1px solid var(--border);border-radius:13px;padding:12px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:all .2s}
+.voice-card.selected{border-color:#6c63ff;background:rgba(108,99,255,0.1)}
+.voice-avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.voice-name{font-size:14px;color:var(--text)}
+.voice-desc{font-size:11px;color:var(--text3);margin-top:1px}
+.voice-play{width:30px;height:30px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.voice-play svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+.danger-btn{width:100%;padding:12px;background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.25);border-radius:12px;color:#f87171;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:7px}
+.small-btn{font-size:11px;padding:5px 11px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text2);cursor:pointer;font-family:'DM Sans',sans-serif}
+
+/* MODALS */
+#api-modal,#eleven-modal{position:fixed;inset:0;background:rgba(10,10,15,0.96);z-index:200;display:none;flex-direction:column;align-items:center;justify-content:center;padding:28px}
+#api-modal.open,#eleven-modal.open{display:flex}
+.modal-box{background:#1a1a25;border:1px solid rgba(108,99,255,0.3);border-radius:20px;padding:26px 22px;width:100%;max-width:360px}
+.modal-box h2{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:#f0f0ff;margin-bottom:7px}
+.modal-box p{font-size:13px;color:#9090b0;line-height:1.6;margin-bottom:18px}
+.modal-input{width:100%;background:#111118;border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:11px 15px;font-size:14px;color:#f0f0ff;font-family:'DM Sans',sans-serif;outline:none;margin-bottom:10px}
+.modal-input:focus{border-color:#6c63ff}
+.modal-save{width:100%;padding:12px;background:#6c63ff;border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif}
+.modal-skip{display:block;text-align:center;margin-top:12px;font-size:12px;color:var(--text3);cursor:pointer}
+.modal-link{display:block;text-align:center;margin-top:12px;font-size:12px;color:#6c63ff;text-decoration:none}
+
+/* TOAST */
+#toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:9px 16px;font-size:13px;color:var(--text);opacity:0;transition:all .3s;z-index:999;white-space:nowrap;pointer-events:none;max-width:90vw;text-align:center}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
 </head>
 <body>
 <div id="app">
+
+  <!-- CHAT -->
   <div class="screen active" id="chat-screen">
     <div class="top-bar">
       <h1>FluentAI</h1>
-      <span class="badge" id="mode-badge">💬 Free talk</span>
-    </div>
-    <div class="welcome-box" id="welcome-box">
-      <h2>Xin chào! 👋</h2>
-      <p>Chọn chế độ luyện tập phía dưới rồi bắt đầu. Nhấn mic 🎙️ để nói thay vì gõ!</p>
+      <span class="badge" id="mode-badge">💬 Free</span>
     </div>
     <div id="chat-messages"></div>
     <div id="chat-input-area">
       <div class="mode-chips">
-        <div class="chip active" onclick="setMode(this,'free','Free talk','Chat tự nhiên, AI sửa lỗi nhẹ nhàng.')">💬 Free</div>
-        <div class="chip" onclick="setMode(this,'correct','Correction','Sửa lỗi chi tiết từng câu.')">✏️ Sửa lỗi</div>
-        <div class="chip" onclick="setMode(this,'interview','Interview','Luyện phỏng vấn tiếng Anh.')">🎯 Phỏng vấn</div>
-        <div class="chip" onclick="setMode(this,'debate','Debate','Tranh luận để nói nhanh hơn.')">🔥 Tranh luận</div>
-        <div class="chip" onclick="setMode(this,'story','Storytelling','Kể chuyện, mở rộng từ vựng.')">📖 Kể chuyện</div>
+        <div class="chip active" onclick="setMode(this,'free','Free','Chat tự nhiên, AI sửa lỗi nhẹ.')">💬 Free</div>
+        <div class="chip" onclick="setMode(this,'correct','Sửa lỗi','Sửa lỗi chi tiết từng câu.')">✏️ Sửa lỗi</div>
+        <div class="chip" onclick="setMode(this,'interview','Phỏng vấn','Luyện phỏng vấn tiếng Anh.')">🎯 Phỏng vấn</div>
+        <div class="chip" onclick="setMode(this,'debate','Tranh luận','Nói nhanh, tư duy tiếng Anh.')">🔥 Tranh luận</div>
+        <div class="chip" onclick="setMode(this,'story','Kể chuyện','Storytelling + từ vựng.')">📖 Story</div>
       </div>
+      <div class="voice-status" id="voice-status"></div>
       <div class="input-row">
+        <button class="icon-btn" id="voice-loop-btn" onclick="toggleVoiceLoop()" title="Hội thoại liên tục">
+          <svg viewBox="0 0 24 24"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
+        </button>
         <button class="icon-btn" id="mic-btn" onclick="toggleMic()">
           <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
         </button>
-        <textarea id="msg-input" rows="1" placeholder="Gõ tiếng Anh hoặc nhấn mic..."></textarea>
+        <textarea id="msg-input" rows="1" placeholder="Gõ hoặc nhấn mic..."></textarea>
         <button class="icon-btn" id="send-btn" onclick="sendMessage()">
           <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
         </button>
@@ -161,14 +232,78 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
     </div>
   </div>
 
+  <!-- SHADOWING -->
   <div class="screen" id="shadow-screen">
-    <div class="top-bar"><h1>Shadowing</h1><span class="badge">🎙️ Luyện nói</span></div>
+    <div class="top-bar"><h1>Shadowing</h1><span class="badge">🎙️</span></div>
     <div class="shadow-list" id="shadow-list"></div>
   </div>
 
+  <!-- FLASHCARD -->
+  <div class="screen" id="flash-screen">
+    <div class="top-bar"><h1>Từ vựng</h1><span class="badge" id="flash-badge">0 từ</span></div>
+    <div class="flash-body" id="flash-body"></div>
+  </div>
+
+  <!-- PROGRESS -->
   <div class="screen" id="progress-screen">
     <div class="top-bar"><h1>Tiến độ</h1><span class="badge" id="day-badge">Ngày 1</span></div>
     <div class="prog-body" id="prog-body"></div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="screen" id="settings-screen">
+    <div class="top-bar"><h1>Cài đặt</h1><span class="badge">⚙️</span></div>
+    <div class="settings-body">
+      <div class="settings-section">
+        <div class="settings-title">Giọng đọc AI</div>
+        <div class="voice-grid" id="voice-grid"><div style="font-size:13px;color:var(--text3)">Đang tải giọng...</div></div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-title">ElevenLabs (giọng siêu tự nhiên)</div>
+        <div class="settings-row">
+          <div><div class="settings-label">ElevenLabs API</div><div class="settings-sub" id="eleven-status">Chưa kết nối</div></div>
+          <button class="small-btn" onclick="document.getElementById('eleven-modal').classList.add('open')">Kết nối</button>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-label">Giọng ElevenLabs</div><div class="settings-sub">Rachel (US Female)</div></div>
+          <select id="eleven-voice-select" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:5px 8px;color:var(--text);font-size:12px;font-family:'DM Sans',sans-serif" onchange="localStorage.setItem('elevenVoiceId',this.value)">
+            <option value="21m00Tcm4TlvDq8ikWAM">Rachel (US Female)</option>
+            <option value="AZnzlk1XvdvUeBnXmlld">Domi (US Female)</option>
+            <option value="EXAVITQu4vr4xnSDxMaL">Bella (US Female)</option>
+            <option value="ErXwobaYiN019PkySvjV">Antoni (US Male)</option>
+            <option value="VR6AewLTigWG4xSOukaG">Arnold (US Male)</option>
+            <option value="pNInz6obpgDQGcFmaJgB">Adam (US Male)</option>
+            <option value="yoZ06aMxZJJ28mfd3POQ">Sam (US Male)</option>
+          </select>
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-title">Tốc độ & âm thanh</div>
+        <div class="settings-row">
+          <div><div class="settings-label">Tốc độ đọc</div></div>
+          <div class="rate-row">
+            <input type="range" id="rate-slider" min="0.5" max="1.5" step="0.1" value="0.9" oninput="updateRate(this.value)">
+            <span class="rate-val" id="rate-val">0.9x</span>
+          </div>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-label">Tự đọc câu trả lời</div></div>
+          <button class="toggle on" id="auto-speak-toggle" onclick="toggleAutoSpeak(this)"></button>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-label">Chấm điểm phát âm</div><div class="settings-sub">Sau mỗi lần nói bằng mic</div></div>
+          <button class="toggle on" id="score-toggle" onclick="toggleScoring(this)"></button>
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-title">Tài khoản</div>
+        <div class="settings-row">
+          <div><div class="settings-label">Anthropic API Key</div><div class="settings-sub" id="key-status">Chưa cài đặt</div></div>
+          <button class="small-btn" onclick="showApiKeyScreen()">Đổi</button>
+        </div>
+        <button class="danger-btn" onclick="clearData()">Xoá toàn bộ dữ liệu</button>
+      </div>
+    </div>
   </div>
 
   <nav id="nav">
@@ -176,30 +311,25 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
       <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Chat
     </button>
     <button class="nav-btn" onclick="showScreen('shadow-screen',this)">
-      <svg viewBox="0 0 24 24"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>Shadowing
+      <svg viewBox="0 0 24 24"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>Shadow
     </button>
-    <button class="nav-btn" onclick="showScreen('progress-screen',this)">
+    <button class="nav-btn" onclick="showScreen('flash-screen',this);renderFlash()">
+      <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Từ vựng
+    </button>
+    <button class="nav-btn" onclick="showScreen('progress-screen',this);renderProgress()">
       <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Tiến độ
+    </button>
+    <button class="nav-btn" onclick="showScreen('settings-screen',this);loadVoices()">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Cài đặt
     </button>
   </nav>
 </div>
 
-<div id="api-modal">
-  <div class="api-box">
-    <h2>🔑 Nhập API Key</h2>
-    <p>Anh cần API key của Anthropic để dùng AI chat. Key được lưu trên máy anh, không gửi đi đâu khác.</p>
-    <input class="api-input" id="api-key-input" type="password" placeholder="sk-ant-api03-..." />
-    <button class="api-save-btn" onclick="saveApiKey()">Lưu và bắt đầu</button>
-    <a class="api-link" href="https://console.anthropic.com/settings/keys" target="_blank">Lấy API key tại console.anthropic.com →</a>
-  </div>
-</div>
-
+<!-- SHADOW PLAYER -->
 <div id="shadow-player">
   <div class="player-header">
-    <div class="back-btn" onclick="closePlayer()">
-      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-    </div>
-    <div class="player-title-text" id="player-title">-</div>
+    <div class="back-btn" onclick="closePlayer()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+    <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:600;flex:1" id="player-title">-</div>
   </div>
   <div class="player-body" id="player-body"></div>
   <div class="player-controls">
@@ -227,114 +357,132 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
   </div>
 </div>
 
+<!-- API KEY MODAL -->
+<div id="api-modal">
+  <div class="modal-box">
+    <h2>🔑 Anthropic API Key</h2>
+    <p>Nhập API key để dùng AI chat. Key lưu trên máy anh, không gửi đi đâu khác.</p>
+    <input class="modal-input" id="api-key-input" type="password" placeholder="sk-ant-api03-..."/>
+    <button class="modal-save" onclick="saveApiKey()">Lưu và bắt đầu</button>
+    <a class="modal-link" href="https://console.anthropic.com/settings/keys" target="_blank">Lấy key tại console.anthropic.com →</a>
+  </div>
+</div>
+
+<!-- ELEVENLABS MODAL -->
+<div id="eleven-modal">
+  <div class="modal-box">
+    <h2>🎙️ ElevenLabs API Key</h2>
+    <p>Giọng AI cực tự nhiên. Miễn phí 10,000 ký tự/tháng tại elevenlabs.io</p>
+    <input class="modal-input" id="eleven-key-input" type="password" placeholder="Dán API key ElevenLabs..."/>
+    <button class="modal-save" onclick="saveElevenKey()">Kết nối ElevenLabs</button>
+    <span class="modal-skip" onclick="document.getElementById('eleven-modal').classList.remove('open')">Bỏ qua, dùng giọng trình duyệt</span>
+    <a class="modal-link" href="https://elevenlabs.io" target="_blank">Đăng ký miễn phí tại elevenlabs.io →</a>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
+// ── MODES ──────────────────────────────────────────────
 var MODES = {
-  free: { emoji:'💬', system:'You are an English conversation coach for a Vietnamese learner. Have natural conversations in English. After your reply, if the user made mistakes, add a brief "Tip:" with ONE correction. Keep replies 2-4 sentences. Be encouraging.' },
-  correct: { emoji:'✏️', system:'You are a strict English grammar coach for a Vietnamese learner. For every message: 1) Correct ALL mistakes with explanation. 2) Show corrected version. 3) Respond naturally. Be thorough but concise.' },
-  interview: { emoji:'🎯', system:'You are an English job interview coach. Ask one interview question at a time. After the answer, give brief feedback on clarity, vocabulary, structure. Then ask next question. Topics: experience, strengths, goals.' },
-  debate: { emoji:'🔥', system:'You are an English debate partner for a Vietnamese learner. Pick a topic and argue the opposite side. Challenge points respectfully. Help them think fast in English. Correct major grammar gently.' },
-  story: { emoji:'📖', system:'You are an English storytelling coach. Build collaborative stories turn by turn. After each contribution, continue the story AND suggest 2-3 advanced vocabulary words they could use. Correct grammar gently.' }
+  free:{emoji:'💬',system:'You are an English conversation coach for a Vietnamese learner. Chat naturally in English. After your reply, if there were grammar or vocabulary mistakes, add a line starting with "💡 Tip:" with one concise correction. Keep replies to 2-4 sentences. Be warm and encouraging. Also, if you spot interesting vocabulary words in your reply, list them at the end as "📚 Words: word1, word2" (max 3 words).'},
+  correct:{emoji:'✏️',system:'You are a strict English grammar coach for a Vietnamese learner. For every message: 1) Show "✏️ Corrections:" with each error and fix. 2) Write the fully corrected sentence in bold. 3) Respond naturally. Also add "📚 Words: word1, word2" for new vocab.'},
+  interview:{emoji:'🎯',system:'You are an English job interview coach. Ask one realistic interview question at a time. After the answer, give feedback on clarity, vocabulary, structure (2-3 lines). Then ask the next question. Topics: experience, strengths, goals, challenges. Add "📚 Words:" for useful interview vocab.'},
+  debate:{emoji:'🔥',system:'You are an English debate partner. Pick a topic and argue the opposite side from the user. Challenge points respectfully to help them think fast in English. Correct major grammar gently. Add "📚 Words:" for advanced vocabulary used.'},
+  story:{emoji:'📖',system:'You are an English storytelling coach. Build collaborative stories turn by turn. After each contribution continue the story, then add "📚 Words: word1, word2, word3" with 3 advanced vocabulary alternatives they could use. Gently correct grammar.'}
 };
 
+// ── LESSONS ──────────────────────────────────────────
 var LESSONS = [
-  { cat:'Cơ bản', title:'Giới thiệu bản thân', level:'Dễ', time:'2 phút',
-    sentences:[
-      {text:"Hi! My name is David and I'm from Hanoi, Vietnam.", ph:"/haɪ/ /maɪ/ /neɪm/ /ɪz/ /deɪvɪd/"},
-      {text:"I've been learning English for about two years now.", ph:"/aɪv/ /biːn/ /lɜːrnɪŋ/ /ˈɪŋɡlɪʃ/"},
-      {text:"In my free time, I enjoy watching movies and listening to podcasts.", ph:"/ɪn/ /maɪ/ /friː/ /taɪm/"},
-      {text:"I'm really excited to improve my English speaking skills.", ph:"/aɪm/ /ˈrɪəli/ /ɪkˈsaɪtɪd/"}
-    ]
-  },
-  { cat:'Giao tiếp', title:'Đặt đồ ăn tại nhà hàng', level:'Dễ', time:'2 phút',
-    sentences:[
-      {text:"Excuse me, could I see the menu, please?", ph:"/ɪkˈskjuːz/ /miː/ /kʊd/ /aɪ/"},
-      {text:"I'd like to order the grilled chicken with vegetables.", ph:"/aɪd/ /laɪk/ /tuː/ /ˈɔːrdər/"},
-      {text:"Could you make it a little less spicy?", ph:"/kʊd/ /juː/ /meɪk/ /ɪt/"},
-      {text:"That was absolutely delicious! Could we have the check, please?", ph:"/ˈæbsəluːtli/ /dɪˈlɪʃəs/"}
-    ]
-  },
-  { cat:'Công việc', title:'Họp online tiếng Anh', level:'Trung bình', time:'3 phút',
-    sentences:[
-      {text:"Good morning everyone. Thank you for joining today's meeting.", ph:"/ɡʊd/ /ˈmɔːrnɪŋ/ /ˈevriˌwʌn/"},
-      {text:"Let me quickly go over today's agenda before we get started.", ph:"/let/ /miː/ /ˈkwɪkli/ /ɡoʊ/"},
-      {text:"I'd like to highlight three key points from last quarter.", ph:"/aɪd/ /laɪk/ /tuː/ /ˈhaɪlaɪt/"},
-      {text:"Does anyone have any questions before we move on?", ph:"/dʌz/ /ˈeniˌwʌn/ /hæv/"},
-      {text:"Let's schedule a follow-up meeting to discuss this further.", ph:"/lets/ /ˈskɛdʒuːl/"}
-    ]
-  },
-  { cat:'Nâng cao', title:'TED Talk: Passion & Success', level:'Khó', time:'3 phút',
-    sentences:[
-      {text:"The secret to success isn't talent — it's the relentless pursuit of passion.", ph:"/ðə/ /ˈsiːkrɪt/ /tuː/ /səkˈsɛs/"},
-      {text:"Every great achievement begins with the decision to try one more time.", ph:"/ˈevri/ /ɡreɪt/ /əˈtʃiːvmənt/"},
-      {text:"What separates extraordinary people is not their circumstances, but their mindset.", ph:"/wɒt/ /ˈsɛpəreɪts/"},
-      {text:"Embrace failure as a stepping stone, not a stumbling block.", ph:"/ɪmˈbreɪs/ /ˈfeɪljər/"}
-    ]
-  },
-  { cat:'Đời sống', title:'Kể chuyện cuối tuần', level:'Trung bình', time:'2 phút',
-    sentences:[
-      {text:"Last weekend was absolutely fantastic — I couldn't have asked for better.", ph:"/læst/ /ˈwiːkˌɛnd/ /ˈæbsəluːtli/"},
-      {text:"My friends and I decided to take a spontaneous road trip to the mountains.", ph:"/spɒnˈteɪniəs/ /roʊd/ /trɪp/"},
-      {text:"The scenery was breathtaking — lush green valleys and crystal clear streams.", ph:"/ðə/ /ˈsiːnəri/ /ˈbrɛθˌteɪkɪŋ/"},
-      {text:"I definitely want to go back there before the rainy season.", ph:"/ˈdɛfɪnɪtli/ /wɒnt/"}
-    ]
-  }
+  {cat:'Cơ bản',title:'Giới thiệu bản thân',level:'Dễ',time:'2 phút',sentences:[
+    {text:"Hi! My name is David and I'm from Hanoi, Vietnam.",ph:"/haɪ/ /maɪ/ /neɪm/ /ɪz/ /deɪvɪd/"},
+    {text:"I've been learning English for about two years now.",ph:"/aɪv/ /biːn/ /lɜːrnɪŋ/"},
+    {text:"In my free time, I enjoy watching movies and listening to podcasts.",ph:"/ɪn/ /maɪ/ /friː/ /taɪm/"},
+    {text:"I'm really excited to improve my English speaking skills.",ph:"/aɪm/ /ˈrɪəli/ /ɪkˈsaɪtɪd/"}
+  ]},
+  {cat:'Giao tiếp',title:'Đặt đồ ăn tại nhà hàng',level:'Dễ',time:'2 phút',sentences:[
+    {text:"Excuse me, could I see the menu, please?",ph:"/ɪkˈskjuːz/ /miː/ /kʊd/ /aɪ/"},
+    {text:"I'd like to order the grilled chicken with vegetables.",ph:"/aɪd/ /laɪk/ /tuː/ /ˈɔːrdər/"},
+    {text:"Could you make it a little less spicy?",ph:"/kʊd/ /juː/ /meɪk/ /ɪt/"},
+    {text:"That was absolutely delicious! Could we have the check, please?",ph:"/ˈæbsəluːtli/ /dɪˈlɪʃəs/"}
+  ]},
+  {cat:'Công việc',title:'Họp online tiếng Anh',level:'Trung bình',time:'3 phút',sentences:[
+    {text:"Good morning everyone. Thank you for joining today's meeting.",ph:"/ɡʊd/ /ˈmɔːrnɪŋ/ /ˈevriˌwʌn/"},
+    {text:"Let me quickly go over today's agenda before we get started.",ph:"/let/ /miː/ /ˈkwɪkli/"},
+    {text:"I'd like to highlight three key points from last quarter.",ph:"/aɪd/ /laɪk/ /tuː/ /ˈhaɪlaɪt/"},
+    {text:"Does anyone have any questions before we move on?",ph:"/dʌz/ /ˈeniˌwʌn/"},
+    {text:"Let's schedule a follow-up meeting to discuss this further.",ph:"/lets/ /ˈskɛdʒuːl/"}
+  ]},
+  {cat:'Nâng cao',title:'TED Talk: Passion & Success',level:'Khó',time:'3 phút',sentences:[
+    {text:"The secret to success isn't talent — it's the relentless pursuit of passion.",ph:"/ðə/ /ˈsiːkrɪt/ /tuː/ /səkˈsɛs/"},
+    {text:"Every great achievement begins with the decision to try one more time.",ph:"/ˈevri/ /ɡreɪt/ /əˈtʃiːvmənt/"},
+    {text:"What separates extraordinary people is not their circumstances, but their mindset.",ph:"/wɒt/ /ˈsɛpəreɪts/"},
+    {text:"Embrace failure as a stepping stone, not a stumbling block.",ph:"/ɪmˈbreɪs/ /ˈfeɪljər/"}
+  ]},
+  {cat:'Đời sống',title:'Kể chuyện cuối tuần',level:'Trung bình',time:'2 phút',sentences:[
+    {text:"Last weekend was absolutely fantastic — I couldn't have asked for better.",ph:"/læst/ /ˈwiːkˌɛnd/ /ˈæbsəluːtli/"},
+    {text:"My friends and I decided to take a spontaneous road trip to the mountains.",ph:"/spɒnˈteɪniəs/ /roʊd/ /trɪp/"},
+    {text:"The scenery was breathtaking — lush green valleys and crystal clear streams.",ph:"/ˈbrɛθˌteɪkɪŋ/ /lʌʃ/ /ˈvæli/"},
+    {text:"I definitely want to go back there before the rainy season.",ph:"/ˈdɛfɪnɪtli/ /wɒnt/"}
+  ]}
 ];
 
+// ── STATE ────────────────────────────────────────────
 var currentMode = 'free';
 var chatHistory = [];
 var recognition = null;
 var isRecording = false;
+var voiceLoopActive = false;
+var selectedVoice = null;
+var autoSpeak = true;
+var scoringEnabled = true;
+var ttsRate = 0.9;
 var currentSpeed = 1;
 var shadowRecorder = null;
 var shadowRecording = false;
 var currentSentIdx = 0;
 var currentLesson = null;
-var stats = JSON.parse(localStorage.getItem('fluentStats') || '{"days":0,"messages":0,"shadows":0,"streak":0,"lastDate":""}');
+var flashCards = JSON.parse(localStorage.getItem('fluentVocab') || '[]');
+var currentFlashIdx = 0;
+var flashFlipped = false;
+var stats = JSON.parse(localStorage.getItem('fluentStats') || '{"days":0,"messages":0,"shadows":0,"streak":0,"lastDate":"","vocabLearned":0}');
+var _enVoices = [];
 
+// ── UTILS ────────────────────────────────────────────
 function showToast(msg) {
   var t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
-  setTimeout(function() { t.classList.remove('show'); }, 2500);
+  setTimeout(function(){ t.classList.remove('show'); }, 2500);
+}
+function escHtml(t){ return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function saveStats(){ localStorage.setItem('fluentStats', JSON.stringify(stats)); }
+function saveVocab(){ localStorage.setItem('fluentVocab', JSON.stringify(flashCards)); }
+
+function autoResize(el){
+  el.style.height='auto';
+  el.style.height=Math.min(el.scrollHeight,90)+'px';
 }
 
-function autoResize(el) {
-  el.style.height = 'auto';
-  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
-}
-
-function handleKey(e) {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-}
-
-function showScreen(id, btn) {
-  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
-  document.querySelectorAll('.nav-btn').forEach(function(b) { b.classList.remove('active'); });
+function showScreen(id, btn){
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+  document.querySelectorAll('.nav-btn').forEach(function(b){ b.classList.remove('active'); });
   document.getElementById(id).classList.add('active');
   btn.classList.add('active');
-  if (id === 'progress-screen') renderProgress();
-  if (id === 'shadow-screen') renderShadowList();
 }
 
-function saveStats() { localStorage.setItem('fluentStats', JSON.stringify(stats)); }
-
-function escHtml(t) { return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-function setMode(el, mode, label, desc) {
+// ── CHAT ────────────────────────────────────────────
+function setMode(el, mode, label, desc){
   currentMode = mode;
-  document.querySelectorAll('.chip').forEach(function(c) { c.classList.remove('active'); });
+  document.querySelectorAll('.chip').forEach(function(c){ c.classList.remove('active'); });
   el.classList.add('active');
   document.getElementById('mode-badge').textContent = MODES[mode].emoji + ' ' + label;
   chatHistory = [];
   document.getElementById('chat-messages').innerHTML = '';
-  var wb = document.getElementById('welcome-box');
-  if (wb) wb.remove();
-  addMsg('ai', MODES[mode].emoji + ' <strong>' + label + '</strong><br><span style="font-size:13px;color:var(--text2)">' + desc + '</span>', null);
+  addMsg('ai', MODES[mode].emoji + ' <strong>' + label + '</strong> — ' + desc, null);
 }
 
-function addMsg(role, html, ttsText) {
+function addMsg(role, html, ttsText){
   var wrap = document.createElement('div');
   wrap.className = 'msg ' + role;
   var bubble = document.createElement('div');
@@ -342,43 +490,55 @@ function addMsg(role, html, ttsText) {
   bubble.innerHTML = html;
   wrap.appendChild(bubble);
   if (role === 'ai' && ttsText) {
-    var btn = document.createElement('button');
-    btn.className = 'speak-again';
-    btn.innerHTML = '<svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg> Nghe lại';
-    (function(txt) { btn.onclick = function() { ttsSpeak(txt); }; })(ttsText);
-    wrap.appendChild(btn);
+    var acts = document.createElement('div');
+    acts.className = 'msg-actions';
+    var playBtn = document.createElement('button');
+    playBtn.className = 'act-btn';
+    playBtn.textContent = '▶ Nghe lại';
+    (function(txt){ playBtn.onclick = function(){ ttsSpeak(txt, true); }; })(ttsText);
+    acts.appendChild(playBtn);
+    wrap.appendChild(acts);
   }
   document.getElementById('chat-messages').appendChild(wrap);
   wrap.scrollIntoView({behavior:'smooth', block:'end'});
+  return wrap;
 }
 
-function showTyping() {
+function showTyping(){
   var el = document.createElement('div');
   el.className = 'msg ai'; el.id = 'typing-msg';
   el.innerHTML = '<div class="typing-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
   document.getElementById('chat-messages').appendChild(el);
   el.scrollIntoView({behavior:'smooth', block:'end'});
 }
-function removeTyping() { var el = document.getElementById('typing-msg'); if (el) el.remove(); }
+function removeTyping(){ var el = document.getElementById('typing-msg'); if(el) el.remove(); }
 
-function formatReply(text) {
-  return text.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>');
+function formatReply(text){
+  // Extract vocab words from AI reply
+  var vocabMatch = text.match(/📚 Words?:\s*(.+)/i);
+  if (vocabMatch) {
+    var words = vocabMatch[1].split(',').map(function(w){ return w.trim().replace(/[^a-zA-Z\s'-]/g,'').trim(); }).filter(Boolean);
+    words.forEach(function(w){ if(w) addVocabWord(w); });
+  }
+  return text
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/📚 Words?:.*$/im, function(m){ return '<div style="margin-top:8px;font-size:12px;color:var(--text3)">📚 Đã lưu vào từ vựng: ' + m.replace(/📚 Words?:\s*/i,'') + '</div>'; })
+    .replace(/\n\n/g,'<br><br>')
+    .replace(/\n/g,'<br>');
 }
 
-async function sendMessage() {
+async function sendMessage(){
   var input = document.getElementById('msg-input');
   var text = input.value.trim();
   if (!text) return;
-  var wb = document.getElementById('welcome-box');
-  if (wb) wb.remove();
+  var apiKey = localStorage.getItem('fluentApiKey') || '';
+  if (!apiKey){ showApiKeyScreen(); return; }
   input.value = ''; input.style.height = 'auto';
   addMsg('user', escHtml(text), null);
   chatHistory.push({role:'user', content:text});
   showTyping();
   stats.messages++; saveStats();
   try {
-    var apiKey = localStorage.getItem('fluentApiKey') || '';
-    if (!apiKey) { removeTyping(); showApiKeyScreen(); return; }
     var res = await fetch('https://api.anthropic.com/v1/messages', {
       method:'POST',
       headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true','x-api-key':apiKey,'anthropic-version':'2023-06-01'},
@@ -386,54 +546,266 @@ async function sendMessage() {
     });
     var data = await res.json();
     removeTyping();
-    if (res.status === 401 || (data.error && data.error.type === 'authentication_error')) {
+    if (res.status === 401 || (data.error && data.error.type === 'authentication_error')){
       localStorage.removeItem('fluentApiKey');
-      addMsg('ai', '🔑 API key không hợp lệ. Vui lòng nhập lại.', null);
+      addMsg('ai','🔑 API key không hợp lệ. Vui lòng nhập lại.',null);
       showApiKeyScreen(); return;
     }
     var reply = (data.content && data.content[0] && data.content[0].text) ? data.content[0].text : 'Sorry, something went wrong.';
     chatHistory.push({role:'assistant', content:reply});
-    var plain = reply.replace(/\*\*(.+?)\*\*/g,'$1').replace(/\n/g,' ').substring(0,300);
+    var plain = reply.replace(/\*\*(.+?)\*\*/g,'$1').replace(/<[^>]+>/g,'').replace(/📚 Words?:.*/gi,'').replace(/\n/g,' ').trim().substring(0,400);
     addMsg('ai', formatReply(reply), plain);
-    ttsSpeak(plain);
-  } catch(e) {
+    ttsSpeak(plain, false);
+  } catch(e){
     removeTyping();
-    addMsg('ai', '⚠️ Lỗi kết nối. Kiểm tra internet và thử lại nhé.', null);
+    addMsg('ai','⚠️ Lỗi kết nối. Kiểm tra internet và thử lại nhé.',null);
   }
 }
 
-function ttsSpeak(text) {
+// ── PRONUNCIATION SCORING ────────────────────────────
+function scorePronunciation(spokenText, expectedText){
+  if (!scoringEnabled || !expectedText) return;
+  var spokenWords = spokenText.toLowerCase().replace(/[^\w\s]/g,'').split(/\s+/);
+  var expectedWords = expectedText.toLowerCase().replace(/[^\w\s]/g,'').split(/\s+/);
+  var correct = 0, total = expectedWords.length;
+  var wordResults = expectedWords.map(function(w){
+    var found = spokenWords.indexOf(w) !== -1;
+    if(found) correct++;
+    return {word:w, ok:found};
+  });
+  var score = Math.round(correct/total*100);
+  var fluency = Math.min(100, Math.round((spokenWords.length/total)*100));
+  var overall = Math.round((score*0.7)+(fluency*0.3));
+  showScoreBox(wordResults, score, fluency, overall);
+}
+
+function showScoreBox(wordResults, accuracy, fluency, overall){
+  var scoreColor = overall >= 80 ? '#34d399' : overall >= 60 ? '#fb923c' : '#f87171';
+  var wordsHtml = wordResults.map(function(w){
+    var cls = w.ok ? 'ws-good' : 'ws-bad';
+    return '<span class="word-score '+cls+'">'+w.word+'</span>';
+  }).join('');
+  var html = '<div class="score-box">' +
+    '<div class="score-title">Kết quả phát âm</div>' +
+    '<div class="score-row"><span class="score-label">Độ chính xác</span><div class="score-bar"><div class="score-fill" style="width:'+accuracy+'%;background:'+scoreColor+'"></div></div><span class="score-num" style="color:'+scoreColor+'">'+accuracy+'%</span></div>' +
+    '<div class="score-row"><span class="score-label">Lưu loát</span><div class="score-bar"><div class="score-fill" style="width:'+fluency+'%;background:var(--accent)"></div></div><span class="score-num" style="color:var(--accent2)">'+fluency+'%</span></div>' +
+    '<div class="word-scores">'+wordsHtml+'</div>' +
+    '<div style="font-size:11px;color:var(--text3);margin-top:6px">🟢 Đúng &nbsp; 🔴 Cần luyện thêm</div>' +
+    '</div>';
+  var lastMsg = document.getElementById('chat-messages').lastElementChild;
+  if(lastMsg){ lastMsg.insertAdjacentHTML('beforeend', html); lastMsg.scrollIntoView({behavior:'smooth',block:'end'}); }
+}
+
+// ── TTS ──────────────────────────────────────────────
+async function ttsSpeak(text, forced){
+  if (!text) return;
+  if (!autoSpeak && !forced) return;
+  var cleanText = text.replace(/<[^>]+>/g,'').replace(/[💡📚✏️🎯🔥📖💬🔑⚠️]/g,'').trim().substring(0,400);
+  var elevenKey = localStorage.getItem('elevenApiKey');
+  if (elevenKey) {
+    await ttsElevenLabs(cleanText, elevenKey);
+    return;
+  }
+  ttsBrowser(cleanText);
+}
+
+async function ttsElevenLabs(text, apiKey){
+  try {
+    var voiceId = localStorage.getItem('elevenVoiceId') || '21m00Tcm4TlvDq8ikWAM';
+    var res = await fetch('https://api.elevenlabs.io/v1/text-to-speech/'+voiceId, {
+      method:'POST',
+      headers:{'Content-Type':'application/json','xi-api-key':apiKey},
+      body:JSON.stringify({text:text,model_id:'eleven_monolingual_v1',voice_settings:{stability:0.5,similarity_boost:0.75}})
+    });
+    if (!res.ok){ ttsBrowser(text); return; }
+    var blob = await res.blob();
+    var url = URL.createObjectURL(blob);
+    var audio = new Audio(url);
+    audio.playbackRate = ttsRate;
+    audio.play().then(function(){
+      if (voiceLoopActive) {
+        audio.onended = function(){ setTimeout(startListening, 600); };
+      }
+    }).catch(function(){ ttsBrowser(text); });
+  } catch(e){ ttsBrowser(text); }
+}
+
+function ttsBrowser(text){
   if (!window.speechSynthesis) return;
   window.speechSynthesis.cancel();
   var utter = new SpeechSynthesisUtterance(text);
-  utter.lang = 'en-US'; utter.rate = 0.9; utter.pitch = 1;
-  var voices = speechSynthesis.getVoices();
-  var v = voices.filter(function(v){return v.lang.startsWith('en-US');})[0] || voices.filter(function(v){return v.lang.startsWith('en');})[0];
-  if (v) utter.voice = v;
+  utter.lang = 'en-US'; utter.rate = ttsRate; utter.pitch = 1;
+  if (selectedVoice){ utter.voice = selectedVoice; utter.lang = selectedVoice.lang; }
+  else {
+    var voices = speechSynthesis.getVoices();
+    var v = voices.filter(function(v){ return v.lang.startsWith('en-US'); })[0] || voices.filter(function(v){ return v.lang.startsWith('en'); })[0];
+    if (v) utter.voice = v;
+  }
+  if (voiceLoopActive) { utter.onend = function(){ setTimeout(startListening, 600); }; }
   speechSynthesis.speak(utter);
 }
 
-function toggleMic() {
-  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) { showToast('Dùng Chrome để bật mic!'); return; }
-  if (isRecording) { if (recognition) recognition.stop(); return; }
+// ── VOICE LOOP ───────────────────────────────────────
+function toggleVoiceLoop(){
+  voiceLoopActive = !voiceLoopActive;
+  var btn = document.getElementById('voice-loop-btn');
+  var status = document.getElementById('voice-status');
+  btn.classList.toggle('active', voiceLoopActive);
+  if (voiceLoopActive){
+    status.textContent = '🔄 Chế độ hội thoại liên tục — AI đọc xong tự nghe lại';
+    showToast('🔄 Voice loop bật! Nói chuyện như gọi điện');
+  } else {
+    status.textContent = '';
+    if (recognition) recognition.stop();
+    window.speechSynthesis.cancel();
+    showToast('Voice loop tắt');
+  }
+}
+
+// ── MIC / STT ────────────────────────────────────────
+function toggleMic(){
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)){
+    showToast('Dùng Chrome để bật mic!'); return;
+  }
+  if (isRecording){ if(recognition) recognition.stop(); return; }
+  startListening();
+}
+
+function startListening(){
+  if (isRecording) return;
   var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   recognition = new SR();
   recognition.lang = 'en-US'; recognition.continuous = false; recognition.interimResults = true;
-  recognition.onstart = function() { isRecording=true; document.getElementById('mic-btn').classList.add('recording'); showToast('🎙️ Đang nghe...'); };
-  recognition.onresult = function(e) {
-    var fin='',int='';
-    for (var i=0;i<e.results.length;i++){if(e.results[i].isFinal)fin+=e.results[i][0].transcript;else int+=e.results[i][0].transcript;}
-    var el=document.getElementById('msg-input'); el.value=fin||int; autoResize(el);
+  var lastInterim = '';
+  recognition.onstart = function(){
+    isRecording = true;
+    document.getElementById('mic-btn').classList.add('recording');
+    if (voiceLoopActive) document.getElementById('voice-status').textContent = '🎙️ Đang nghe anh nói...';
+    else showToast('🎙️ Đang nghe...');
   };
-  recognition.onend = function() {
-    isRecording=false; document.getElementById('mic-btn').classList.remove('recording');
-    var val=document.getElementById('msg-input').value.trim(); if(val)sendMessage();
+  recognition.onresult = function(e){
+    var fin = '', intr = '';
+    for(var i=0;i<e.results.length;i++){ if(e.results[i].isFinal) fin+=e.results[i][0].transcript; else intr+=e.results[i][0].transcript; }
+    lastInterim = fin || intr;
+    document.getElementById('msg-input').value = lastInterim;
+    autoResize(document.getElementById('msg-input'));
   };
-  recognition.onerror = function(e) { isRecording=false; document.getElementById('mic-btn').classList.remove('recording'); showToast('Mic error: '+e.error); };
+  recognition.onend = function(){
+    isRecording = false;
+    document.getElementById('mic-btn').classList.remove('recording');
+    if (voiceLoopActive) document.getElementById('voice-status').textContent = '🔄 Đang xử lý...';
+    var val = document.getElementById('msg-input').value.trim();
+    if (val){
+      if (scoringEnabled && lastInterim) {
+        var lastAiText = '';
+        for(var i=chatHistory.length-1;i>=0;i--){ if(chatHistory[i].role==='assistant'){ lastAiText=chatHistory[i].content.replace(/<[^>]+>/g,'').replace(/\*\*(.+?)\*\*/g,'$1'); break; } }
+        if (lastAiText) scorePronunciation(lastInterim, lastAiText.substring(0,100));
+      }
+      sendMessage();
+    } else if (voiceLoopActive) {
+      document.getElementById('voice-status').textContent = '🔄 Hội thoại liên tục bật — nhấn mic để nói';
+    }
+  };
+  recognition.onerror = function(e){
+    isRecording = false;
+    document.getElementById('mic-btn').classList.remove('recording');
+    showToast('Lỗi mic: ' + e.error);
+  };
   recognition.start();
 }
 
-function renderShadowList() {
+// ── VOCAB / FLASHCARDS ───────────────────────────────
+function addVocabWord(word){
+  word = word.trim().toLowerCase();
+  if (!word || word.length < 2) return;
+  var exists = flashCards.some(function(c){ return c.word.toLowerCase() === word; });
+  if (!exists){
+    flashCards.push({word:word, meaning:'', example:'', added:Date.now(), level:0, nextReview:Date.now()});
+    saveVocab();
+    var badge = document.getElementById('flash-badge');
+    if(badge) badge.textContent = flashCards.length + ' từ';
+  }
+}
+
+function renderFlash(){
+  var badge = document.getElementById('flash-badge');
+  if(badge) badge.textContent = flashCards.length + ' từ';
+  var body = document.getElementById('flash-body');
+  var due = flashCards.filter(function(c){ return c.nextReview <= Date.now(); });
+  if (flashCards.length === 0){
+    body.innerHTML = '<div class="no-cards"><div>📚</div>Chưa có từ nào!<br><br>Chat với AI — các từ vựng hay sẽ tự động được lưu vào đây.<br><br><span style="font-size:12px;color:var(--accent2)">Mẹo: Dùng chế độ Story hoặc Free talk để học nhiều từ mới nhất.</span></div>';
+    return;
+  }
+  if (due.length === 0){
+    body.innerHTML = '<div class="no-cards"><div>🎉</div>Ôn xong hết rồi!<br><br>Anh đã ôn xong ' + flashCards.length + ' từ hôm nay.<br>Quay lại sau để ôn từ tiếp theo.<br><br><button onclick="forceShowAll()" style="margin-top:12px;padding:10px 20px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;color:var(--text2);cursor:pointer;font-family:DM Sans,sans-serif;font-size:13px">Xem lại tất cả ' + flashCards.length + ' từ</button></div>';
+    return;
+  }
+  currentFlashIdx = 0;
+  flashFlipped = false;
+  showFlashCard(due, 0);
+}
+
+function forceShowAll(){
+  flashCards.forEach(function(c){ c.nextReview = Date.now(); });
+  saveVocab(); renderFlash();
+}
+
+function showFlashCard(due, idx){
+  if (idx >= due.length){ renderFlash(); return; }
+  var card = due[idx];
+  var total = due.length;
+  var meanings = {
+    'relentless':'không ngừng nghỉ, kiên trì','pursuit':'sự theo đuổi','extraordinary':'phi thường','embrace':'đón nhận, ôm ấp',
+    'stumbling':'vấp ngã, khó khăn','spontaneous':'tự phát, không kế hoạch','breathtaking':'ngoạn mục, tuyệt vời',
+    'fantastic':'tuyệt vời','absolutely':'hoàn toàn, chắc chắn','improvement':'sự cải thiện','fluent':'trôi chảy',
+    'vocabulary':'từ vựng','pronunciation':'phát âm','challenge':'thử thách','opportunity':'cơ hội'
+  };
+  var meaning = card.meaning || meanings[card.word] || '(Nhấn để xem nghĩa)';
+  var body = document.getElementById('flash-body');
+  body.innerHTML =
+    '<div class="flash-header"><span class="flash-count">' + (idx+1) + ' / ' + total + ' từ cần ôn</span><span style="font-size:12px;color:var(--accent2)">Cấp ' + (card.level||0) + '</span></div>' +
+    '<div class="flash-card-wrap"><div class="flash-card" id="flash-card" onclick="flipCard()">' +
+      '<div class="flash-face flash-front">' +
+        '<div class="flash-word">' + card.word + '</div>' +
+        '<div class="flash-phonetic">Nhấn để xem nghĩa</div>' +
+        '<div class="flash-context">— nhớ không anh? —</div>' +
+      '</div>' +
+      '<div class="flash-face flash-back">' +
+        '<div class="flash-meaning">' + meaning + '</div>' +
+        '<div class="flash-example" style="color:var(--text3);font-size:12px;margin-top:10px">Đã học ' + (card.level||0) + ' lần</div>' +
+      '</div>' +
+    '</div></div>' +
+    '<button class="flash-speak-btn" onclick="ttsSpeak(\'' + card.word.replace(/'/g,"\\'") + '\',true)">▶ Nghe phát âm</button>' +
+    '<div class="flash-actions">' +
+      '<button class="flash-btn flash-bad" onclick="rateCard(' + idx + ',-1,this)">😟 Quên rồi</button>' +
+      '<button class="flash-btn flash-ok" onclick="rateCard(' + idx + ',0,this)">😐 Mờ mờ</button>' +
+      '<button class="flash-btn flash-good" onclick="rateCard(' + idx + ',1,this)">😊 Nhớ rồi!</button>' +
+    '</div>';
+  window._flashDue = due;
+}
+
+function flipCard(){
+  var card = document.getElementById('flash-card');
+  if(card) card.classList.toggle('flipped');
+}
+
+function rateCard(idx, rating, btn){
+  var due = window._flashDue;
+  if(!due || idx>=due.length) return;
+  var card = due[idx];
+  var globalIdx = flashCards.findIndex(function(c){ return c.word === card.word; });
+  if(globalIdx>=0){
+    if(rating===1){ flashCards[globalIdx].level=(flashCards[globalIdx].level||0)+1; flashCards[globalIdx].nextReview=Date.now()+((flashCards[globalIdx].level)*86400000); }
+    else if(rating===0){ flashCards[globalIdx].nextReview=Date.now()+3600000; }
+    else { flashCards[globalIdx].level=0; flashCards[globalIdx].nextReview=Date.now()+1800000; }
+    saveVocab();
+    stats.vocabLearned=(stats.vocabLearned||0)+1; saveStats();
+  }
+  showFlashCard(due, idx+1);
+}
+
+// ── SHADOWING ────────────────────────────────────────
+function renderShadowList(){
   var html = LESSONS.map(function(l,i){
     return '<div class="shadow-card" onclick="openLesson('+i+')">' +
       '<div class="s-cat">'+l.cat+'</div><div class="s-title">'+l.title+'</div>' +
@@ -443,103 +815,154 @@ function renderShadowList() {
   document.getElementById('shadow-list').innerHTML = html;
 }
 
-function openLesson(idx) {
-  currentLesson = LESSONS[idx]; currentSentIdx = 0;
-  document.getElementById('player-title').textContent = currentLesson.title;
+function openLesson(idx){
+  currentLesson=LESSONS[idx]; currentSentIdx=0;
+  document.getElementById('player-title').textContent=currentLesson.title;
   renderPlayerBody();
   document.getElementById('shadow-player').classList.add('open');
 }
 
-function renderPlayerBody() {
-  var html = '<div class="script-label">Nhấn ▶ để nghe · Nói theo đồng thời · ◎ để ghi âm giọng mình</div>';
+function renderPlayerBody(){
+  var html='<div class="script-label">▶ Nghe → nói theo đồng thời → ◎ ghi âm giọng mình</div>';
   currentLesson.sentences.forEach(function(s,i){
-    html += '<div class="sent-block" id="sent-'+i+'"><div class="sent-text'+(i===currentSentIdx?' active':'')+'">'+s.text+'</div><div class="phonetic">'+s.ph+'</div></div>';
+    html+='<div class="sent-block" id="sent-'+i+'"><div class="sent-text'+(i===currentSentIdx?' active':'')+'">'+ s.text+'</div><div class="phonetic">'+s.ph+'</div></div>';
   });
-  document.getElementById('player-body').innerHTML = html;
+  document.getElementById('player-body').innerHTML=html;
 }
 
-function highlightSent(idx) {
-  document.querySelectorAll('.sent-text').forEach(function(el,i){ el.classList.toggle('active', i===idx); });
-  var b = document.getElementById('sent-'+idx); if(b) b.scrollIntoView({behavior:'smooth',block:'center'});
+function highlightSent(idx){
+  document.querySelectorAll('.sent-text').forEach(function(el,i){ el.classList.toggle('active',i===idx); });
+  var b=document.getElementById('sent-'+idx); if(b) b.scrollIntoView({behavior:'smooth',block:'center'});
 }
 
-function playCurrentSentence() {
-  if (!currentLesson) return;
-  var s = currentLesson.sentences[currentSentIdx]; if (!s) return;
+function playCurrentSentence(){
+  if(!currentLesson) return;
+  var s=currentLesson.sentences[currentSentIdx]; if(!s) return;
   highlightSent(currentSentIdx); shadowSpeak(s.text);
 }
 
-function shadowSpeak(text) {
-  if (!window.speechSynthesis) return;
+function shadowSpeak(text){
+  if(!window.speechSynthesis) return;
   window.speechSynthesis.cancel();
-  var utter = new SpeechSynthesisUtterance(text);
+  var utter=new SpeechSynthesisUtterance(text);
   utter.lang='en-US'; utter.rate=currentSpeed; utter.pitch=1;
-  var voices=speechSynthesis.getVoices();
-  var v=voices.filter(function(v){return v.lang.startsWith('en-US');})[0]||voices.filter(function(v){return v.lang.startsWith('en');})[0];
-  if(v) utter.voice=v;
-  utter.onend = function() {
-    document.getElementById('shadow-status').textContent = '▶ Bây giờ anh nói lại!';
+  if(selectedVoice){utter.voice=selectedVoice;utter.lang=selectedVoice.lang;}
+  else{var voices=speechSynthesis.getVoices();var v=voices.filter(function(v){return v.lang.startsWith('en-US');})[0]||voices.filter(function(v){return v.lang.startsWith('en');})[0];if(v) utter.voice=v;}
+  utter.onend=function(){
+    document.getElementById('shadow-status').textContent='▶ Bây giờ anh nói lại!';
     setTimeout(function(){
-      document.getElementById('shadow-status').textContent = '';
-      if(currentLesson && currentSentIdx < currentLesson.sentences.length-1){ currentSentIdx++; highlightSent(currentSentIdx); }
-    }, 2500);
+      document.getElementById('shadow-status').textContent='';
+      if(currentLesson&&currentSentIdx<currentLesson.sentences.length-1){currentSentIdx++;highlightSent(currentSentIdx);}
+    },2500);
   };
   speechSynthesis.speak(utter);
-  stats.shadows++; saveStats();
+  stats.shadows++;saveStats();
 }
 
-function repeatCurrent() { if(currentLesson){ var s=currentLesson.sentences[currentSentIdx]; if(s) shadowSpeak(s.text); } }
+function repeatCurrent(){if(currentLesson){var s=currentLesson.sentences[currentSentIdx];if(s)shadowSpeak(s.text);}}
+function setSpeed(s,btn){currentSpeed=s;document.querySelectorAll('.speed-btn').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');}
 
-function setSpeed(s,btn) {
-  currentSpeed=s;
-  document.querySelectorAll('.speed-btn').forEach(function(b){b.classList.remove('active');}); btn.classList.add('active');
-}
-
-function toggleShadowRecord() {
-  var btn=document.getElementById('rec-btn'), status=document.getElementById('shadow-status');
-  if (!shadowRecording) {
+function toggleShadowRecord(){
+  var btn=document.getElementById('rec-btn'),status=document.getElementById('shadow-status');
+  if(!shadowRecording){
     navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
-      shadowRecorder=new MediaRecorder(stream); var chunks=[];
+      shadowRecorder=new MediaRecorder(stream);var chunks=[];
       shadowRecorder.ondataavailable=function(e){chunks.push(e.data);};
-      shadowRecorder.onstop=function(){ stream.getTracks().forEach(function(t){t.stop();}); showToast('✅ Đang phát lại giọng anh...'); var blob=new Blob(chunks,{type:'audio/webm'}); new Audio(URL.createObjectURL(blob)).play(); };
-      shadowRecorder.start(); shadowRecording=true; btn.classList.add('on'); status.textContent='🔴 Đang ghi âm...';
-    }).catch(function(){ showToast('Không thể truy cập mic'); });
-  } else { shadowRecorder.stop(); shadowRecording=false; btn.classList.remove('on'); status.textContent=''; }
+      shadowRecorder.onstop=function(){stream.getTracks().forEach(function(t){t.stop();});showToast('✅ Đang phát lại...');var blob=new Blob(chunks,{type:'audio/webm'});new Audio(URL.createObjectURL(blob)).play();};
+      shadowRecorder.start();shadowRecording=true;btn.classList.add('on');status.textContent='🔴 Đang ghi âm...';
+    }).catch(function(){showToast('Không thể truy cập mic');});
+  } else {shadowRecorder.stop();shadowRecording=false;btn.classList.remove('on');status.textContent='';}
 }
 
-function closePlayer() {
+function closePlayer(){
   document.getElementById('shadow-player').classList.remove('open');
   window.speechSynthesis.cancel();
   if(shadowRecording&&shadowRecorder){shadowRecorder.stop();shadowRecording=false;}
-  currentSentIdx=0; currentLesson=null;
+  currentSentIdx=0;currentLesson=null;
 }
 
-function updateStreak() {
+// ── SETTINGS ─────────────────────────────────────────
+function loadVoices(){
+  var voices=speechSynthesis.getVoices();
+  var enVoices=voices.filter(function(v){return v.lang.startsWith('en');});
+  if(enVoices.length===0){setTimeout(loadVoices,300);return;}
+  var saved=localStorage.getItem('fluentVoice');
+  var grid=document.getElementById('voice-grid');if(!grid)return;
+  var flags={'en-US':'🇺🇸','en-GB':'🇬🇧','en-AU':'🇦🇺','en-IN':'🇮🇳'};
+  _enVoices=enVoices.slice(0,8);
+  var html=_enVoices.map(function(v,i){
+    var flag=flags[v.lang]||'🌐';
+    var isSel=saved?v.name===saved:i===0;
+    if(isSel) selectedVoice=v;
+    return '<div class="voice-card'+(isSel?' selected':'')+'" id="vc-'+i+'" onclick="selectVoice('+i+',this)">'+
+      '<div class="voice-avatar" style="background:'+(i%2===0?'rgba(108,99,255,0.15)':'rgba(167,139,250,0.15)')+'">'+flag+'</div>'+
+      '<div style="flex:1"><div class="voice-name">'+v.name.replace(/\(.*\)/,'').trim()+'</div><div class="voice-desc">'+v.lang+(v.localService?' · Local':' · Online')+'</div></div>'+
+      '<div class="voice-play" onclick="event.stopPropagation();previewVoice('+i+')"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor" stroke="none"/></svg></div></div>';
+  }).join('');
+  grid.innerHTML=html||'<div style="font-size:13px;color:var(--text3)">Không tìm thấy giọng EN. Vào Settings Android → TTS → cài thêm giọng Google.</div>';
+  var ks=document.getElementById('key-status');
+  var k=localStorage.getItem('fluentApiKey');
+  if(ks) ks.textContent=k?'sk-ant-...'+k.slice(-6):'Chưa cài đặt';
+  var es=document.getElementById('eleven-status');
+  var ek=localStorage.getItem('elevenApiKey');
+  if(es) es.textContent=ek?'✅ Đã kết nối':'Chưa kết nối — miễn phí 10k ký tự/tháng';
+  var savedRate=localStorage.getItem('fluentRate');
+  if(savedRate){ttsRate=parseFloat(savedRate);document.getElementById('rate-slider').value=savedRate;document.getElementById('rate-val').textContent=savedRate+'x';}
+  var savedEV=localStorage.getItem('elevenVoiceId');
+  if(savedEV) document.getElementById('eleven-voice-select').value=savedEV;
+}
+
+function selectVoice(idx,el){
+  selectedVoice=_enVoices[idx];localStorage.setItem('fluentVoice',selectedVoice.name);
+  document.querySelectorAll('.voice-card').forEach(function(c){c.classList.remove('selected');});el.classList.add('selected');
+  showToast('Đã chọn: '+selectedVoice.name.replace(/\(.*\)/,'').trim());
+}
+function previewVoice(idx){var v=_enVoices[idx];if(!v)return;window.speechSynthesis.cancel();var u=new SpeechSynthesisUtterance("Hello! This is how I sound. Nice to meet you!");u.voice=v;u.lang=v.lang;u.rate=ttsRate;speechSynthesis.speak(u);}
+function updateRate(val){ttsRate=parseFloat(val);document.getElementById('rate-val').textContent=val+'x';localStorage.setItem('fluentRate',val);}
+function toggleAutoSpeak(btn){autoSpeak=!autoSpeak;btn.classList.toggle('on',autoSpeak);localStorage.setItem('fluentAutoSpeak',autoSpeak?'1':'0');}
+function toggleScoring(btn){scoringEnabled=!scoringEnabled;btn.classList.toggle('on',scoringEnabled);localStorage.setItem('fluentScoring',scoringEnabled?'1':'0');}
+function clearData(){if(confirm('Xoá toàn bộ dữ liệu?')){localStorage.clear();location.reload();}}
+
+// ── API KEYS ─────────────────────────────────────────
+function showApiKeyScreen(){document.getElementById('api-modal').classList.add('open');setTimeout(function(){document.getElementById('api-key-input').focus();},300);}
+function saveApiKey(){
+  var key=document.getElementById('api-key-input').value.trim();
+  if(!key||!key.startsWith('sk-')){showToast('Key không hợp lệ, phải bắt đầu bằng sk-');return;}
+  localStorage.setItem('fluentApiKey',key);
+  document.getElementById('api-modal').classList.remove('open');
+  showToast('✅ Đã lưu API key!');
+  addMsg('ai','✅ Đã kết nối! Chọn chế độ và bắt đầu luyện tiếng Anh thôi anh!',null);
+}
+function saveElevenKey(){
+  var key=document.getElementById('eleven-key-input').value.trim();
+  if(!key){showToast('Vui lòng nhập key');return;}
+  localStorage.setItem('elevenApiKey',key);
+  document.getElementById('eleven-modal').classList.remove('open');
+  showToast('✅ ElevenLabs đã kết nối! Giọng AI sẽ tự nhiên hơn nhiều.');
+}
+
+// ── PROGRESS ─────────────────────────────────────────
+function updateStreak(){
   var today=new Date().toDateString();
-  if(stats.lastDate!==today){
-    var yest=new Date(Date.now()-86400000).toDateString();
-    stats.streak = stats.lastDate===yest ? stats.streak+1 : 1;
-    stats.days=Math.min(stats.days+1,30); stats.lastDate=today; saveStats();
-  }
+  if(stats.lastDate!==today){var yest=new Date(Date.now()-86400000).toDateString();stats.streak=stats.lastDate===yest?stats.streak+1:1;stats.days=Math.min(stats.days+1,30);stats.lastDate=today;saveStats();}
 }
-
-function renderProgress() {
+function renderProgress(){
   updateStreak();
   document.getElementById('day-badge').textContent='Ngày '+stats.days;
   var tips=[
     {cat:'Shadowing',tip:'Lặp mỗi câu ít nhất 5 lần. Bắt đầu 0.75x, tăng lên 1.0x khi quen.'},
-    {cat:'Luyện nói',tip:'Ghi âm giọng mình mỗi ngày rồi nghe lại. Dở lúc đầu là bình thường!'},
-    {cat:'Từ vựng',tip:'Học theo cụm (make a decision) thay vì từ đơn. Hiệu quả hơn gấp 3 lần.'},
-    {cat:'Tư duy',tip:'Thấy vật gì, nghĩ tên tiếng Anh ngay. Sau 3-4 tuần não sẽ tự chuyển.'},
-    {cat:'Phát âm',tip:'Chú ý word stress. Sai trọng âm nghe rất kỳ dù đúng từ.'}
+    {cat:'Voice Loop',tip:'Bật chế độ hội thoại liên tục — nói chuyện với AI như gọi điện thật, không ngắt quãng.'},
+    {cat:'Từ vựng',tip:'Mở tab Từ vựng mỗi ngày ôn 10 từ. Spaced repetition giúp nhớ lâu gấp 3 lần.'},
+    {cat:'Phát âm',tip:'Nhìn vào điểm chấm sau mỗi câu nói — từ nào màu đỏ thì luyện riêng từ đó.'},
+    {cat:'Tư duy',tip:'Thấy vật gì, nghĩ tên tiếng Anh ngay. Sau 3-4 tuần não sẽ tự chuyển sang tiếng Anh.'},
   ];
-  var dots=Array.from({length:30},function(_,i){ var c=i<stats.days?'done':(i===stats.days?'today':''); return '<div class="day-dot '+c+'">'+(i+1)+'</div>'; }).join('');
+  var dots=Array.from({length:30},function(_,i){var c=i<stats.days?'done':(i===stats.days?'today':'');return '<div class="day-dot '+c+'">'+(i+1)+'</div>';}).join('');
   document.getElementById('prog-body').innerHTML=
-    '<div class="streak-card"><div style="font-size:38px">🔥</div><div><div class="streak-num">'+stats.streak+'</div><div class="streak-sub">ngày liên tiếp</div></div></div>'+
+    '<div class="streak-card"><div style="font-size:36px">🔥</div><div><div class="streak-num">'+stats.streak+'</div><div class="streak-sub">ngày liên tiếp</div></div></div>'+
     '<div class="stat-grid">'+
       '<div class="stat-card"><div class="stat-val">'+stats.messages+'</div><div class="stat-lab">Tin nhắn chat</div></div>'+
       '<div class="stat-card"><div class="stat-val">'+stats.shadows+'</div><div class="stat-lab">Câu shadowing</div></div>'+
-      '<div class="stat-card"><div class="stat-val">'+stats.days+'</div><div class="stat-lab">Ngày học</div></div>'+
+      '<div class="stat-card"><div class="stat-val">'+flashCards.length+'</div><div class="stat-lab">Từ vựng đã lưu</div></div>'+
       '<div class="stat-card"><div class="stat-val">'+Math.round(stats.days/30*100)+'%</div><div class="stat-lab">Lộ trình 30 ngày</div></div>'+
     '</div>'+
     '<div class="sec-title">30 ngày lộ trình</div><div class="day-dots">'+dots+'</div>'+
@@ -547,39 +970,29 @@ function renderProgress() {
     tips.map(function(t){return '<div class="tip-card"><div class="tip-cat">'+t.cat+'</div><div class="tip-body">'+t.tip+'</div></div>';}).join('');
 }
 
-// attach events after DOM ready
-document.addEventListener('DOMContentLoaded', function() {
-  var inp = document.getElementById('msg-input');
-  inp.addEventListener('input', function(){ autoResize(this); });
-  inp.addEventListener('keydown', function(e){ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();} });
+// ── INIT ─────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded',function(){
+  var inp=document.getElementById('msg-input');
+  inp.addEventListener('input',function(){autoResize(this);});
+  inp.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}});
 });
 
-function showApiKeyScreen() {
-  document.getElementById('api-modal').classList.add('open');
-  setTimeout(function(){ document.getElementById('api-key-input').focus(); }, 300);
-}
+speechSynthesis.onvoiceschanged=function(){
+  var sv=localStorage.getItem('fluentVoice');
+  if(sv){var voices=speechSynthesis.getVoices();var found=voices.filter(function(v){return v.name===sv;})[0];if(found) selectedVoice=found;}
+  var sr=localStorage.getItem('fluentRate');if(sr) ttsRate=parseFloat(sr);
+  var sas=localStorage.getItem('fluentAutoSpeak');if(sas!==null) autoSpeak=sas==='1';
+  var ssc=localStorage.getItem('fluentScoring');if(ssc!==null) scoringEnabled=ssc==='1';
+};
 
-function saveApiKey() {
-  var key = document.getElementById('api-key-input').value.trim();
-  if (!key || !key.startsWith('sk-')) { showToast('Key không hợp lệ, phải bắt đầu bằng sk-'); return; }
-  localStorage.setItem('fluentApiKey', key);
-  document.getElementById('api-modal').classList.remove('open');
-  showToast('✅ Đã lưu API key!');
-  var wb = document.getElementById('welcome-box');
-  if (!wb) addMsg('ai', '✅ API key đã lưu! Hãy chọn chế độ và bắt đầu luyện tiếng Anh nhé anh!', null);
-}
-
-speechSynthesis.onvoiceschanged = function(){ speechSynthesis.getVoices(); };
 updateStreak();
 renderShadowList();
+document.getElementById('flash-badge').textContent=flashCards.length+' từ';
 
 setTimeout(function(){
-  var wb=document.getElementById('welcome-box');
-  if(wb && document.getElementById('chat-messages').children.length===0){
-    addMsg('ai',"👋 Hi! I'm your English AI Coach.<br><br>Choose a mode above and let's start practicing! Tap the mic 🎙️ to speak instead of typing.<br><br><em style='color:var(--text3);font-size:13px'>Chọn chế độ ở trên để bắt đầu luyện nhé anh!</em>","Hi! I'm your English AI Coach. Choose a mode and let's start!");
-  }
-  if (!localStorage.getItem('fluentApiKey')) {
-    setTimeout(showApiKeyScreen, 800);
+  if(document.getElementById('chat-messages').children.length===0){
+    addMsg('ai',"👋 Hi! I'm your English AI Coach.<br><br>Chọn chế độ ở trên và bắt đầu! Nhấn 🔄 để bật hội thoại liên tục như gọi điện.<br><br><em style='color:var(--text3);font-size:12px'>Từ vựng hay sẽ tự động lưu vào tab Từ vựng để ôn sau nhé!</em>","Hi! I'm your English AI Coach. Let's start practicing!");
+    if(!localStorage.getItem('fluentApiKey')) setTimeout(showApiKeyScreen,900);
   }
 },400);
 </script>
